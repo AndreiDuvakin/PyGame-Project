@@ -3,7 +3,7 @@ import sys
 from pygame.locals import *
 
 
-class Dowload:
+class Download:
     def __init__(self):
         self.timer = pygame.time.Clock()
         self.im1 = pygame.image.load('imagine/dino1.png')
@@ -41,6 +41,7 @@ class Dowload:
             self.timer.tick(5)
             count = (count + 1) % 4
 
+
 class Ostrov:
     def __init__(self, *args):
         for i in args:
@@ -59,7 +60,16 @@ class Ostrov:
             if i == "snow":
                 self.snow_img = pygame.image.load('imagine/snow.png').convert()
                 self.snow_img.set_colorkey((255, 255, 255))
-        f = open('map1.txt')
+            if i == "lava":
+                self.lava_img = pygame.image.load('imagine/lava.png').convert()
+                self.lava_img.set_colorkey((255, 255, 255))
+            if i == "obsid":
+                self.obsid_img = pygame.image.load('imagine/obsid.png').convert()
+                self.obsid_img.set_colorkey((255, 255, 255))
+            if i == "grkam":
+                self.grkam_img = pygame.image.load('imagine/grasskam.png').convert()
+                self.grkam_img.set_colorkey((255, 255, 255))
+        f = open('map3.txt')
         self.map_data = [[c for c in row] for row in f.read().split('\n')]
         f.close()
 
@@ -78,6 +88,12 @@ class Ostrov:
                         display.blit(self.water_img, (170 + x * 14 - y * 14, 120 + x * 8 + y * 8))
                     if tile == "k":
                         display.blit(self.kam_img, (170 + x * 14 - y * 14, 120 + x * 8 + y * 8))
+                    if tile == "l":
+                        display.blit(self.lava_img, (170 + x * 14 - y * 14, 120 + x * 8 + y * 8))
+                    if tile == "o":
+                        display.blit(self.obsid_img, (170 + x * 14 - y * 14, 120 + x * 8 + y * 8))
+                    if tile == "g":
+                        display.blit(self.grkam_img, (170 + x * 14 - y * 14, 120 + x * 8 + y * 8))
             screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
             pygame.display.update()
             for event in pygame.event.get():
@@ -92,8 +108,8 @@ icon = pygame.image.load('imagine/din.png')
 pygame.display.set_icon(icon)
 screen = pygame.display.set_mode((800, 800), 0, 32)
 display = pygame.Surface((300, 300))
-ostrov = Ostrov("ice", "box", "kam", "snow", "water")
-dow = Dowload()
+ostrov = Ostrov("ice", "box", "kam", "snow", "water", "lava", "obsid", "grkam")
+dow = Download()
 dow.draw()
 ostrov.draw()
 
