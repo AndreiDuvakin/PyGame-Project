@@ -1,6 +1,72 @@
 import pygame
 import sys
 from pygame.locals import *
+import os
+
+FPS = 60
+pygame.init()
+all_sprites = pygame.sprite.Group()
+obstacles_group = pygame.sprite.Group()
+tiles_group = pygame.sprite.Group()
+player_group = pygame.sprite.Group()
+
+
+def load_image(name, color_key=None):
+    fullname = os.path.join('imagine', name)
+    try:
+        image = pygame.image.load(fullname).convert()
+    except pygame.error as message:
+        print('Cannot load image:', name)
+        raise SystemExit(message)
+
+    if color_key is not None:
+        if color_key == -1:
+            color_key = image.get_at((0, 0))
+        image.set_colorkey(color_key)
+    else:
+        image = image.convert_alpha()
+    return image
+
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(player_group, all_sprites)
+        self.image = load_image('din11.png', (255, 255, 255))
+        self.rect = self.image.get_rect()
+        self.image = pygame.transform.scale(self.image, (100, 100))
+        self.rect.x = pos_x
+        self.rect.y = pos_y
+
+    def update(self):
+        self.rect.x -= 1
+        if pygame.key.get_pressed()[pygame.K_LEFT] and not pygame.sprite.spritecollideany(self, obstacles_group) \
+                and pygame.sprite.spritecollideany(
+            self, tiles_group):
+            self.rect.x -= 1
+        else:
+            self.rect.x += 1
+        self.rect.x += 1
+        if pygame.key.get_pressed()[pygame.K_RIGHT] and not pygame.sprite.spritecollideany(self,
+                                                                                           obstacles_group) \
+                and pygame.sprite.spritecollideany(
+            self, tiles_group):
+            self.rect.x += 1
+        else:
+            self.rect.x -= 1
+        self.rect.y -= 1
+        if pygame.key.get_pressed()[pygame.K_UP] and not pygame.sprite.spritecollideany(self, obstacles_group) \
+                and pygame.sprite.spritecollideany(self, tiles_group):
+            self.rect.y -= 1
+        else:
+            self.rect.y += 1
+        self.rect.y += 1
+        if pygame.key.get_pressed()[pygame.K_DOWN] and not pygame.sprite.spritecollideany(self,
+                                                                                          obstacles_group) \
+                and pygame.sprite.spritecollideany(
+            self, tiles_group):
+            self.rect.y += 1
+        else:
+            self.rect.y -= 1
 
 
 class Dowload:
@@ -41,6 +107,7 @@ class Dowload:
             self.timer.tick(5)
             count = (count + 1) % 4
 
+
 class Ostrov:
     def __init__(self, *args):
         for i in args:
@@ -64,37 +131,80 @@ class Ostrov:
         f.close()
 
     def draw(self):
-        while True:
-            display.fill((0, 0, 0))
-            for y, row in enumerate(self.map_data):
-                for x, tile in enumerate(row):
-                    if tile == "i":
-                        display.blit(self.ice_img, (170 + x * 14 - y * 14, 120 + x * 8 + y * 8))
-                    if tile == "b":
-                        display.blit(self.box_img, (170 + x * 14 - y * 14, 120 + x * 8 + y * 8))
-                    if tile == "s":
-                        display.blit(self.snow_img, (170 + x * 14 - y * 14, 120 + x * 8 + y * 8))
-                    if tile == "w":
-                        display.blit(self.water_img, (170 + x * 14 - y * 14, 120 + x * 8 + y * 8))
-                    if tile == "k":
-                        display.blit(self.kam_img, (170 + x * 14 - y * 14, 120 + x * 8 + y * 8))
-            screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
-            pygame.display.update()
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
+        # while True:
+        display.fill((0, 0, 0))
+        for y, row in enumerate(self.map_data):
+            for x, tile in enumerate(row):
+                if tile == "i":
+                    Tile(self.ice_img, 550 + x * 56 - y * 56, 120 + x * 32 + y * 32, obstacles_group)
+                if tile == "b":
+                    Tile(self.box_img, 550 + x * 56 - y * 56, 120 + x * 32 + y * 32, tiles_group)
+                if tile == "s":
+                    Tile(self.snow_img, 550 + x * 56 - y * 56, 120 + x * 32 + y * 32, tiles_group)
+                if tile == "w":
+                    Tile(self.water_img, 550 + x * 56 - y * 56, 120 + x * 32 + y * 32, obstacles_group)
+                if tile == "k":
+                    Tile(self.kam_img, 550 + x * 56 - y * 56, 120 + x * 32 + y * 32, tiles_group)
+        screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
+        pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
 
 
-pygame.init()
+class Tile(pygame.sprite.Sprite):
+    def __init__(self, imge, pos_x, pos_y, *arg):
+        super().__init__(all_sprites, *arg)
+        self.rect = imge.get_rect().move(pos_x, pos_y)
+        self.image = pygame.transform.scale(imge, (100, 100))
+        self.rect.center = (pos_x, pos_y)
+
+
+class Camera:
+    # зададим начальный сдвиг камеры
+    def __init__(self):
+        self.dx = 0
+        self.dy = 0
+
+    # сдвинуть объект obj на смещение камеры
+    def apply(self, obj):
+        obj.rect.x += self.dx
+        obj.rect.y += self.dy
+
+    # позиционировать камеру на объекте target
+    def update(self, target):
+        self.dx = -(target.rect.x + target.rect.w // 2 - 1000 // 2)
+        self.dy = -(target.rect.y + target.rect.h // 2 - 650 // 2)
+
+
+def start_game():
+    player = Player(500, 325)
+    running = True
+    clock = pygame.time.Clock()
+    camera = Camera()
+    while running:
+        screen.fill((0, 0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+        camera.update(player)
+        for sprite in all_sprites:
+            camera.apply(sprite)
+        all_sprites.draw(screen)
+        all_sprites.update()
+        player_group.update()
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
 pygame.display.set_caption('DinosaurSettlement')
 icon = pygame.image.load('imagine/din.png')
 pygame.display.set_icon(icon)
-screen = pygame.display.set_mode((800, 800), 0, 32)
+screen = pygame.display.set_mode((1000, 650), 0, 32)
 display = pygame.Surface((300, 300))
 ostrov = Ostrov("ice", "box", "kam", "snow", "water")
-dow = Dowload()
-dow.draw()
+# dow = Dowload()
+# dow.draw()
 ostrov.draw()
-
-
+start_game()
