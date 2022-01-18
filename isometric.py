@@ -2,6 +2,7 @@ import pygame
 import sys
 from pygame.locals import *
 import os
+import pytmx
 
 FPS = 60
 pygame.init()
@@ -9,6 +10,9 @@ all_sprites = pygame.sprite.Group()
 obstacles_group = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
+big_obstacles_group = pygame.sprite.Group()
+size_sprite = {15: (200, 200), 16: (200, 200), 17: (200, 200), 18: (200, 200), 20: (60, 60),
+               24: (70, 160), 25: (70, 160), 27: (60, 60), 28: (60, 60)}
 
 
 def load_image(name, color_key=None):
@@ -33,7 +37,7 @@ class Player(pygame.sprite.Sprite):
         super().__init__(player_group, all_sprites)
         self.image = load_image('din11.png', (255, 255, 255))
         self.rect = self.image.get_rect()
-        self.image = pygame.transform.scale(self.image, (100, 100))
+        # self.image = pygame.transform.scale(self.image, (100, 100))
         self.rect.x = pos_x
         self.rect.y = pos_y
 
@@ -41,7 +45,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.x -= 1
         if pygame.key.get_pressed()[pygame.K_LEFT] and not pygame.sprite.spritecollideany(self, obstacles_group) \
                 and pygame.sprite.spritecollideany(
-            self, tiles_group):
+            self, tiles_group) and not pygame.sprite.spritecollideany(self, big_obstacles_group):
             self.rect.x -= 1
         else:
             self.rect.x += 1
@@ -49,13 +53,15 @@ class Player(pygame.sprite.Sprite):
         if pygame.key.get_pressed()[pygame.K_RIGHT] and not pygame.sprite.spritecollideany(self,
                                                                                            obstacles_group) \
                 and pygame.sprite.spritecollideany(
-            self, tiles_group):
+            self, tiles_group) and not pygame.sprite.spritecollideany(self, big_obstacles_group):
             self.rect.x += 1
         else:
             self.rect.x -= 1
         self.rect.y -= 1
         if pygame.key.get_pressed()[pygame.K_UP] and not pygame.sprite.spritecollideany(self, obstacles_group) \
-                and pygame.sprite.spritecollideany(self, tiles_group):
+                and pygame.sprite.spritecollideany(self, tiles_group) \
+                and not pygame.sprite.spritecollideany(self,
+                                                       big_obstacles_group):
             self.rect.y -= 1
         else:
             self.rect.y += 1
@@ -63,7 +69,7 @@ class Player(pygame.sprite.Sprite):
         if pygame.key.get_pressed()[pygame.K_DOWN] and not pygame.sprite.spritecollideany(self,
                                                                                           obstacles_group) \
                 and pygame.sprite.spritecollideany(
-            self, tiles_group):
+            self, tiles_group) and not pygame.sprite.spritecollideany(self, big_obstacles_group):
             self.rect.y += 1
         else:
             self.rect.y -= 1
@@ -127,30 +133,45 @@ class Ostrov:
                 self.snow_img = pygame.image.load('imagine/snow.png').convert()
                 self.snow_img.set_colorkey((255, 255, 255))
         f = open('map1.txt')
-        self.map_data = [[c for c in row] for row in f.read().split('\n')]
+        self.map_data = pytmx.load_pygame('data/map.tmx')  # [[c for c in row] for row in f.read().split('\n')]
         f.close()
 
     def draw(self):
         # while True:
         display.fill((0, 0, 0))
-        for y, row in enumerate(self.map_data):
-            for x, tile in enumerate(row):
-                if tile == "i":
-                    Tile(self.ice_img, 550 + x * 56 - y * 56, 120 + x * 32 + y * 32, obstacles_group)
-                if tile == "b":
-                    Tile(self.box_img, 550 + x * 56 - y * 56, 120 + x * 32 + y * 32, tiles_group)
-                if tile == "s":
-                    Tile(self.snow_img, 550 + x * 56 - y * 56, 120 + x * 32 + y * 32, tiles_group)
-                if tile == "w":
-                    Tile(self.water_img, 550 + x * 56 - y * 56, 120 + x * 32 + y * 32, obstacles_group)
-                if tile == "k":
-                    Tile(self.kam_img, 550 + x * 56 - y * 56, 120 + x * 32 + y * 32, tiles_group)
+        self.height = self.map_data.height
+        self.width = self.map_data.width
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 0)] == 10 or \
+                        self.map_data.tiledgidmap[
+                            self.map_data.get_tile_gid(x, y, 0)] == 9:
+                    Tile(self.map_data.get_tile_image(x, y, 0), 550 + x * 56 - y * 56, 120 + x * 32 + y * 32,
+                         tiles_group)
+                if self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 0)] == 11 or \
+                        self.map_data.tiledgidmap[
+                            self.map_data.get_tile_gid(x, y, 0)] == 7:
+                    Tile(self.map_data.get_tile_image(x, y, 0), 550 + x * 56 - y * 56, 120 + x * 32 + y * 32,
+                         obstacles_group)
+                if self.map_data.get_tile_image(x, y, 1) != None:
+                    BigTile(self.map_data.get_tile_image(x, y, 1), 550 + x * 56 - y * 56, 120 + x * 32 + y * 32,
+                            self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)],
+                            big_obstacles_group)
         screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+
+
+class BigTile(pygame.sprite.Sprite):
+    def __init__(self, imge, pos_x, pos_y, num, *arg):
+        super().__init__(all_sprites, *arg)
+        self.rect = imge.get_rect().move(pos_x, pos_y)
+        sixe = size_sprite[num]
+        self.image = pygame.transform.scale(imge, sixe)
+        self.rect.center = (pos_x, pos_y)
 
 
 class Tile(pygame.sprite.Sprite):
@@ -179,7 +200,7 @@ class Camera:
 
 
 def start_game():
-    player = Player(500, 325)
+    player = Player(100, 1000)
     running = True
     clock = pygame.time.Clock()
     camera = Camera()
@@ -193,6 +214,7 @@ def start_game():
             camera.apply(sprite)
         all_sprites.draw(screen)
         all_sprites.update()
+        big_obstacles_group.draw(screen)
         player_group.update()
         pygame.display.flip()
         clock.tick(FPS)
