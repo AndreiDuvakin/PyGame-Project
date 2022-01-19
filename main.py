@@ -16,7 +16,7 @@ size_sprite = {15: (200, 200), 16: (200, 200), 17: (200, 200), 18: (200, 200), 2
 
 
 def load_image(name, color_key=None):
-    fullname = os.path.join('imagine', name)
+    fullname = os.path.join('data/images', name)
     try:
         image = pygame.image.load(fullname).convert()
     except pygame.error as message:
