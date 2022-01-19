@@ -32,6 +32,42 @@ def load_image(name, color_key=None):
     return image
 
 
+class StartWindow:
+    def __init__(self):
+        self.img = pygame.image.load("data/sound.png")
+        self.img = pygame.transform.scale(self.img, (40, 40))
+        self.button = pygame.image.load("data/button.png")
+        self.button = pygame.transform.scale(self.button, (650, 350))
+        self.sound = True
+
+    def draw(self):
+        running = True
+        while running:
+            display.fill((255, 248, 231))
+            screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
+            screen.blit(self.img, (900, 20))
+            screen.blit(self.button, (150, 150))
+            pygame.display.update()
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pos = event.pos
+                    if (pos[0] > 880 and pos[0] < 980) and (pos[1] > 20 and pos[1] < 80) and self.sound:
+                        self.img = pygame.image.load("data/no_sound.png")
+                        self.sound = False
+                        self.img = pygame.transform.scale(self.img, (40, 40))
+                        sound.stop()
+                    elif (pos[0] > 880 and pos[0] < 980) and (pos[1] > 20 and pos[1] < 80) and not self.sound:
+                        self.img = pygame.image.load("data/sound.png")
+                        self.sound = True
+                        self.img = pygame.transform.scale(self.img, (40, 40))
+                        sound.play()
+                    elif (pos[0] > 215 and pos[0] < 720) and (pos[1] > 220 and pos[1] < 420):
+                        running = False
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
@@ -80,17 +116,21 @@ class Dowload:
         self.timer = pygame.time.Clock()
         self.im1 = pygame.image.load('imagine/dino1.png')
         self.im1.set_colorkey((255, 255, 255))
+        self.im1 = pygame.transform.scale(self.im1, (70, 80))
         self.im2 = pygame.image.load('imagine/dino2.png')
         self.im2.set_colorkey((255, 255, 255))
+        self.im2 = pygame.transform.scale(self.im2, (70, 80))
         self.im3 = pygame.image.load('imagine/dino3.png')
         self.im3.set_colorkey((255, 255, 255))
+        self.im3 = pygame.transform.scale(self.im3, (70, 80))
         self.im4 = pygame.image.load('imagine/dino4.png')
         self.im4.set_colorkey((255, 255, 255))
+        self.im4 = pygame.transform.scale(self.im4, (70, 80))
 
     def draw(self):
         count = 0
         font = pygame.font.Font(None, 40)
-        text_x = 300
+        text_x = 380
         text_y = 450
 
         for i in range(20):
@@ -132,7 +172,7 @@ class Ostrov:
             if i == "snow":
                 self.snow_img = pygame.image.load('imagine/snow.png').convert()
                 self.snow_img.set_colorkey((255, 255, 255))
-        f = open('map1.txt')
+        f = open('map2.txt')
         self.map_data = pytmx.load_pygame('data/map.tmx')  # [[c for c in row] for row in f.read().split('\n')]
         f.close()
 
@@ -221,12 +261,16 @@ def start_game():
 
 
 pygame.display.set_caption('DinosaurSettlement')
+sound = pygame.mixer.Sound('Music.mp3')
+sound.play()
 icon = pygame.image.load('imagine/din.png')
 pygame.display.set_icon(icon)
 screen = pygame.display.set_mode((1000, 650), 0, 32)
 display = pygame.Surface((300, 300))
+startwin = StartWindow()
+startwin.draw()
 ostrov = Ostrov("ice", "box", "kam", "snow", "water")
-# dow = Dowload()
-# dow.draw()
+dow = Dowload()
+dow.draw()
 ostrov.draw()
 start_game()
