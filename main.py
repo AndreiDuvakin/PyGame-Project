@@ -11,12 +11,12 @@ obstacles_group = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 big_obstacles_group = pygame.sprite.Group()
-size_sprite = {15: (200, 200), 16: (200, 200), 17: (200, 200), 18: (200, 200), 20: (60, 60),
-               24: (70, 160), 25: (70, 160), 27: (60, 60), 28: (60, 60)}
+size_sprite = {6: (90, 90), 15: (200, 200), 16: (200, 200), 17: (200, 200), 18: (200, 200), 20: (60, 60),
+               24: (70, 160), 25: (70, 160), 27: (60, 60), 28: (60, 60), 29: (300, 300)}
 
 
-def load_image(name, color_key=None):
-    fullname = os.path.join('data/images', name)
+def load_image(name, color_key=None, f='titles'):
+    fullname = os.path.join(f'data/{f}', name)
     try:
         image = pygame.image.load(fullname).convert()
     except pygame.error as message:
@@ -71,9 +71,10 @@ class StartWindow:
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
-        self.image = load_image('din11.png', (255, 255, 255))
+        self.image = load_image('din11.png', (255, 255, 255), 'images')
         self.rect = self.image.get_rect()
         # self.image = pygame.transform.scale(self.image, (100, 100))
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect.x = pos_x
         self.rect.y = pos_y
 
@@ -81,32 +82,53 @@ class Player(pygame.sprite.Sprite):
         self.rect.x -= 1
         if pygame.key.get_pressed()[pygame.K_LEFT] and not pygame.sprite.spritecollideany(self, obstacles_group) \
                 and pygame.sprite.spritecollideany(
-            self, tiles_group) and not pygame.sprite.spritecollideany(self, big_obstacles_group):
-            self.rect.x -= 1
+            self, tiles_group):
+            if pygame.sprite.spritecollideany(self, big_obstacles_group) != None:
+                if pygame.sprite.collide_mask(self, pygame.sprite.spritecollideany(self, big_obstacles_group)):
+                    self.rect.x += 1
+                else:
+                    self.rect.x -= 1
+            else:
+                self.rect.x -= 1
         else:
             self.rect.x += 1
         self.rect.x += 1
         if pygame.key.get_pressed()[pygame.K_RIGHT] and not pygame.sprite.spritecollideany(self,
                                                                                            obstacles_group) \
                 and pygame.sprite.spritecollideany(
-            self, tiles_group) and not pygame.sprite.spritecollideany(self, big_obstacles_group):
-            self.rect.x += 1
+            self, tiles_group):
+            if pygame.sprite.spritecollideany(self, big_obstacles_group) != None:
+                if pygame.sprite.collide_mask(self, pygame.sprite.spritecollideany(self, big_obstacles_group)):
+                    self.rect.x -= 1
+                else:
+                    self.rect.x += 1
+            else:
+                self.rect.x += 1
         else:
             self.rect.x -= 1
         self.rect.y -= 1
         if pygame.key.get_pressed()[pygame.K_UP] and not pygame.sprite.spritecollideany(self, obstacles_group) \
-                and pygame.sprite.spritecollideany(self, tiles_group) \
-                and not pygame.sprite.spritecollideany(self,
-                                                       big_obstacles_group):
-            self.rect.y -= 1
+                and pygame.sprite.spritecollideany(self, tiles_group):
+            if pygame.sprite.spritecollideany(self, big_obstacles_group) != None:
+                if pygame.sprite.collide_mask(self, pygame.sprite.spritecollideany(self, big_obstacles_group)):
+                    self.rect.y += 1
+                else:
+                    self.rect.y -= 1
+            else:
+                self.rect.y -= 1
         else:
             self.rect.y += 1
         self.rect.y += 1
-        if pygame.key.get_pressed()[pygame.K_DOWN] and not pygame.sprite.spritecollideany(self,
-                                                                                          obstacles_group) \
-                and pygame.sprite.spritecollideany(
-            self, tiles_group) and not pygame.sprite.spritecollideany(self, big_obstacles_group):
-            self.rect.y += 1
+        if pygame.key.get_pressed()[pygame.K_DOWN] and not pygame.sprite.spritecollideany(self, obstacles_group) \
+                and pygame.sprite.spritecollideany(self, tiles_group):
+            if pygame.sprite.spritecollideany(self, big_obstacles_group) != None:
+                if pygame.sprite.collide_mask(self, pygame.sprite.spritecollideany(self, big_obstacles_group)):
+                    self.rect.y -= 1
+                else:
+                    self.rect.x += 1
+            else:
+                self.rect.y += 1
+
         else:
             self.rect.y -= 1
 
@@ -156,26 +178,7 @@ class Dowload:
 
 class Ostrov:
     def __init__(self, *args):
-        # for i in args:
-        #     if i == "ice":
-        #         self.ice_img = pygame.image.load('imagine/ice.png').convert()
-        #         self.ice_img.set_colorkey((255, 255, 255))
-        #     if i == "water":
-        #         self.water_img = pygame.image.load('imagine/water.png').convert()
-        #         self.water_img.set_colorkey((255, 255, 255))
-        #     if i == "box":
-        #         self.box_img = pygame.image.load('imagine/box.png').convert()
-        #         self.box_img.set_colorkey((255, 255, 255))
-        #     if i == "kam":
-        #         self.kam_img = pygame.image.load('imagine/kam.png').convert()
-        #         self.kam_img.set_colorkey((255, 255, 255))
-        #     if i == "snow":
-        #         self.snow_img = pygame.image.load('imagine/snow.png').convert()
-        #         self.snow_img.set_colorkey((255, 255, 255))
-        # f = open('data/maps/map2.txt')
-        # f.close()
         self.map_data = pytmx.load_pygame('data/maps/map.tmx')  # [[c for c in row] for row in f.read().split('\n')]
-
 
     def draw(self):
         # while True:
@@ -209,9 +212,10 @@ class Ostrov:
 class BigTile(pygame.sprite.Sprite):
     def __init__(self, imge, pos_x, pos_y, num, *arg):
         super().__init__(all_sprites, *arg)
-        self.rect = imge.get_rect().move(pos_x, pos_y)
         sixe = size_sprite[num]
         self.image = pygame.transform.scale(imge, sixe)
+        self.rect = self.image.get_rect().move(pos_x, pos_y)
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect.center = (pos_x, pos_y)
 
 
@@ -220,6 +224,7 @@ class Tile(pygame.sprite.Sprite):
         super().__init__(all_sprites, *arg)
         self.rect = imge.get_rect().move(pos_x, pos_y)
         self.image = pygame.transform.scale(imge, (100, 100))
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect.center = (pos_x, pos_y)
 
 
@@ -241,7 +246,7 @@ class Camera:
 
 
 def start_game():
-    player = Player(100, 1000)
+    player = Player(1000, 1500)
     running = True
     clock = pygame.time.Clock()
     camera = Camera()
@@ -270,7 +275,7 @@ screen = pygame.display.set_mode((1000, 650), 0, 32)
 display = pygame.Surface((300, 300))
 startwin = StartWindow()
 startwin.draw()
-ostrov = Ostrov()
+ostrov = Ostrov("ice", "box", "kam", "snow", "water")
 dow = Dowload()
 dow.draw()
 ostrov.draw()
