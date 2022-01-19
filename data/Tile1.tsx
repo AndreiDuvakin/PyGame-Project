@@ -47,9 +47,9 @@
   <image width="30" height="30" source="box_tile.png"/>
  </tile>
  <tile id="30">
-  <image width="29" height="28" source="../../../../../Downloads/obsid_tile.png"/>
+  <image width="29" height="28" source="obsid_tile.png"/>
  </tile>
  <tile id="31">
-  <image width="29" height="28" source="../../../../../Downloads/lava_title.png"/>
+  <image width="29" height="28" source="lava_title.png"/>
  </tile>
 </tileset>
