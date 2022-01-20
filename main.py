@@ -83,7 +83,7 @@ class Player(pygame.sprite.Sprite):
         super().__init__(player_group, all_sprites)
         self.image = load_image('din11.png', (255, 255, 255), f='images')
         self.rect = self.image.get_rect()
-        # self.image = pygame.transform.scale(self.image, (100, 100))
+        self.image = pygame.transform.scale(self.image, (70, 70))
         self.mask = pygame.mask.from_surface(self.image)
         self.money_sound = pygame.mixer.Sound('data/musics/pick_up_money.mp3')
         self.rect.x = pos_x
@@ -217,7 +217,9 @@ class Ostrov:
             for x in range(self.width):
                 if self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 0)] == 10 or \
                         self.map_data.tiledgidmap[
-                            self.map_data.get_tile_gid(x, y, 0)] == 9:
+                            self.map_data.get_tile_gid(x, y, 0)] == 9 or \
+                        self.map_data.tiledgidmap[
+                            self.map_data.get_tile_gid(x, y, 0)] == 6:
                     Tile(self.map_data.get_tile_image(x, y, 0), 550 + x * 56 - y * 56, 120 + x * 32 + y * 32,
                          tiles_group)
                     self.tiles.append((x, y))
@@ -303,7 +305,7 @@ def start_game(play_sound):
     else:
         play_sound = False
         img = load_image("no_sound.png", convert=False, f='images')
-    player = Player(100, 1000)
+    player = Player(350, 1600)
     img = pygame.transform.scale(img, (40, 40))
     running = True
     clock = pygame.time.Clock()
@@ -352,7 +354,7 @@ display = pygame.Surface((300, 300))
 startwin = StartWindow()
 startwin.draw()
 ostrov = Ostrov()
-dow = Dowload()
-dow.draw()
+#dow = Dowload()
+#dow.draw()
 ostrov.draw()
 start_game(play_sound)
