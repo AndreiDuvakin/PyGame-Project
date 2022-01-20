@@ -3,14 +3,16 @@ import sys
 from pygame.locals import *
 import os
 import pytmx
+import random
 
-FPS = 80
+FPS = 120
 pygame.init()
 all_sprites = pygame.sprite.Group()
 obstacles_group = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 big_obstacles_group = pygame.sprite.Group()
+diamond_group = pygame.sprite.Group()
 size_sprite = {6: (90, 90), 15: (200, 200), 16: (200, 200), 17: (200, 200), 18: (200, 200), 20: (60, 60),
                24: (70, 160), 25: (70, 160), 27: (60, 60), 28: (60, 60), 29: (300, 300)}
 
@@ -83,6 +85,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         # self.image = pygame.transform.scale(self.image, (100, 100))
         self.mask = pygame.mask.from_surface(self.image)
+        self.money_sound = pygame.mixer.Sound('data/musics/pick_up_money.mp3')
         self.rect.x = pos_x
         self.rect.y = pos_y
 
@@ -138,6 +141,9 @@ class Player(pygame.sprite.Sprite):
                 self.rect.y += 1
         else:
             self.rect.y -= 1
+        if pygame.sprite.spritecollideany(self, diamond_group):
+            self.money_sound.play()
+            pygame.sprite.spritecollideany(self, diamond_group).kill()
 
 
 class Dowload:
@@ -179,6 +185,23 @@ class Dowload:
             count = (count + 1) % 4
 
 
+class Diamond(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(all_sprites, diamond_group)
+        self.image = pygame.transform.scale(load_image('dimond.png', (255, 255, 255)), (35, 45))
+        self.rect = self.image.get_rect().move(pos_x, pos_y)
+        self.rect.center = (pos_x, pos_y)
+        # self.image = pygame.transform.scale(self.image, (50, 50))
+
+
+class OreDeposits(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(all_sprites)
+        self.image = load_image('ore_deposits.png', (255, 255, 255))
+        self.rect = self.image.get_rect().move(pos_x, pos_y)
+        self.rect.center = (pos_x, pos_y)
+
+
 class Ostrov:
     def __init__(self):
         self.map_data = pytmx.load_pygame('data/maps/map.tmx')  # [[c for c in row] for row in f.read().split('\n')]
@@ -188,6 +211,8 @@ class Ostrov:
         display.fill((0, 0, 0))
         self.height = self.map_data.height
         self.width = self.map_data.width
+        self.obstacles = []
+        self.tiles = []
         for y in range(self.height):
             for x in range(self.width):
                 if self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 0)] == 10 or \
@@ -195,21 +220,45 @@ class Ostrov:
                             self.map_data.get_tile_gid(x, y, 0)] == 9:
                     Tile(self.map_data.get_tile_image(x, y, 0), 550 + x * 56 - y * 56, 120 + x * 32 + y * 32,
                          tiles_group)
+                    self.tiles.append((x, y))
                 if self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 0)] == 11 or \
                         self.map_data.tiledgidmap[
                             self.map_data.get_tile_gid(x, y, 0)] == 7:
                     Tile(self.map_data.get_tile_image(x, y, 0), 550 + x * 56 - y * 56, 120 + x * 32 + y * 32,
                          obstacles_group)
+                    self.obstacles.append((x, y))
                 if self.map_data.get_tile_image(x, y, 1) != None:
                     BigTile(self.map_data.get_tile_image(x, y, 1), 550 + x * 56 - y * 56, 120 + x * 32 + y * 32,
                             self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)],
                             big_obstacles_group)
+                    self.obstacles.append((x, y))
+        diaminds = random.randint(6, 50)
+        for i in range(diaminds):
+            x, y = random.randint(0, self.width), random.randint(0, self.height)
+            while (x, y) in self.obstacles and (x, y) not in self.tiles:
+                x, y = random.randint(0, self.width), random.randint(0, self.height)
+            Diamond(550 + x * 56 - y * 56, 120 + x * 32 + y * 32)
+            self.obstacles.append((x, y))
+        ore = random.randint(6, 20)
+        for i in range(ore):
+            x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
+            while (x, y) in self.obstacles:
+                x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
+            OreDeposits(550 + x * 56 - y * 56, 120 + x * 32 + y * 32)
         screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+
+    def more_dimond(self):
+        diaminds = random.randint(6, 50)
+        for i in range(diaminds):
+            x, y = random.randint(0, self.width), random.randint(0, self.height)
+            while (x, y) in self.obstacles and (x, y) not in self.tiles:
+                x, y = random.randint(0, self.width), random.randint(0, self.height)
+            Diamond(550 + x * 56 - y * 56, 120 + x * 32 + y * 32)
 
 
 class BigTile(pygame.sprite.Sprite):
@@ -259,6 +308,7 @@ def start_game(play_sound):
     running = True
     clock = pygame.time.Clock()
     camera = Camera()
+    fon = pygame.image.load("data/images/fon_or.png")
     while running:
         screen.fill((0, 0, 0))
         for event in pygame.event.get():
@@ -279,6 +329,9 @@ def start_game(play_sound):
         camera.update(player)
         for sprite in all_sprites:
             camera.apply(sprite)
+        if len(diamond_group) <= 5:
+            ostrov.more_dimond()
+        screen.blit(fon, (0, 0))
         all_sprites.draw(screen)
         all_sprites.update()
         big_obstacles_group.draw(screen)
