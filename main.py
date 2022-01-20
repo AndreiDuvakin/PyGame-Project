@@ -80,7 +80,7 @@ class Player(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.x -= 1
-        if pygame.key.get_pressed()[pygame.K_LEFT] and not pygame.sprite.spritecollideany(self, obstacles_group) \
+        if pygame.key.get_pressed()[pygame.K_a] and not pygame.sprite.spritecollideany(self, obstacles_group) \
                 and pygame.sprite.spritecollideany(
             self, tiles_group):
             if pygame.sprite.spritecollideany(self, big_obstacles_group) != None:
@@ -93,7 +93,7 @@ class Player(pygame.sprite.Sprite):
         else:
             self.rect.x += 1
         self.rect.x += 1
-        if pygame.key.get_pressed()[pygame.K_RIGHT] and not pygame.sprite.spritecollideany(self,
+        if pygame.key.get_pressed()[pygame.K_d] and not pygame.sprite.spritecollideany(self,
                                                                                            obstacles_group) \
                 and pygame.sprite.spritecollideany(
             self, tiles_group):
@@ -107,7 +107,7 @@ class Player(pygame.sprite.Sprite):
         else:
             self.rect.x -= 1
         self.rect.y -= 1
-        if pygame.key.get_pressed()[pygame.K_UP] and not pygame.sprite.spritecollideany(self, obstacles_group) \
+        if pygame.key.get_pressed()[pygame.K_w] and not pygame.sprite.spritecollideany(self, obstacles_group) \
                 and pygame.sprite.spritecollideany(self, tiles_group):
             if pygame.sprite.spritecollideany(self, big_obstacles_group) != None:
                 if pygame.sprite.collide_mask(self, pygame.sprite.spritecollideany(self, big_obstacles_group)):
@@ -119,7 +119,7 @@ class Player(pygame.sprite.Sprite):
         else:
             self.rect.y += 1
         self.rect.y += 1
-        if pygame.key.get_pressed()[pygame.K_DOWN] and not pygame.sprite.spritecollideany(self, obstacles_group) \
+        if pygame.key.get_pressed()[pygame.K_s] and not pygame.sprite.spritecollideany(self, obstacles_group) \
                 and pygame.sprite.spritecollideany(self, tiles_group):
             if pygame.sprite.spritecollideany(self, big_obstacles_group) != None:
                 if pygame.sprite.collide_mask(self, pygame.sprite.spritecollideany(self, big_obstacles_group)):
