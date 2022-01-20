@@ -15,8 +15,8 @@ size_sprite = {6: (90, 90), 15: (200, 200), 16: (200, 200), 17: (200, 200), 18: 
                24: (70, 160), 25: (70, 160), 27: (60, 60), 28: (60, 60), 29: (300, 300)}
 
 
-def load_image(name, color_key=None, convert=True):
-    fullname = os.path.join('data/images', name)
+def load_image(name, color_key=None, convert=True, f='titles'):
+    fullname = os.path.join(f'data/{f}', name)
     try:
         if convert:
             image = pygame.image.load(fullname).convert()
@@ -37,9 +37,9 @@ def load_image(name, color_key=None, convert=True):
 
 class StartWindow:
     def __init__(self):
-        self.img = load_image("sound.png", convert=False)
+        self.img = load_image("sound.png", convert=False, f='images')
         self.img = pygame.transform.scale(self.img, (40, 40))
-        self.button = load_image("play_button.png", convert=False)
+        self.button = load_image("play_button.png", convert=False, f='images')
         self.button = pygame.transform.scale(self.button, (650, 350))
         self.button_sound = pygame.mixer.Sound('data/musics/button_sound.mp3')
         self.font = pygame.font.Font('data/fonts/font.otf', 90)
@@ -62,12 +62,12 @@ class StartWindow:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pos = event.pos
                     if (pos[0] > 880 and pos[0] < 980) and (pos[1] > 20 and pos[1] < 80) and play_sound:
-                        self.img = load_image("no_sound.png", convert=False)
+                        self.img = load_image("no_sound.png", convert=False, f='images')
                         play_sound = False
                         self.img = pygame.transform.scale(self.img, (40, 40))
                         sound.stop()
                     elif (pos[0] > 880 and pos[0] < 980) and (pos[1] > 20 and pos[1] < 80) and not play_sound:
-                        self.img = load_image("sound.png", convert=False)
+                        self.img = load_image("sound.png", convert=False, f='images')
                         play_sound = True
                         self.img = pygame.transform.scale(self.img, (40, 40))
                         sound.play()
@@ -79,7 +79,7 @@ class StartWindow:
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
-        self.image = load_image('din11.png', (255, 255, 255), 'images')
+        self.image = load_image('din11.png', (255, 255, 255), f='images')
         self.rect = self.image.get_rect()
         # self.image = pygame.transform.scale(self.image, (100, 100))
         self.mask = pygame.mask.from_surface(self.image)
@@ -143,13 +143,13 @@ class Player(pygame.sprite.Sprite):
 class Dowload:
     def __init__(self):
         self.timer = pygame.time.Clock()
-        self.im1 = load_image('dino1.png')
+        self.im1 = load_image('dino1.png', f='images')
         self.im1 = pygame.transform.scale(self.im1, (70, 80))
-        self.im2 = load_image('dino2.png')
+        self.im2 = load_image('dino2.png', f='images')
         self.im2 = pygame.transform.scale(self.im2, (70, 80))
-        self.im3 = load_image('dino3.png')
+        self.im3 = load_image('dino3.png', f='images')
         self.im3 = pygame.transform.scale(self.im3, (70, 80))
-        self.im4 = load_image('dino4.png')
+        self.im4 = load_image('dino4.png', f='images')
         self.im4 = pygame.transform.scale(self.im4, (70, 80))
 
     def draw(self):
@@ -250,10 +250,10 @@ class Camera:
 def start_game(play_sound):
     if play_sound:
         play_sound = True
-        img = load_image("sound.png", convert=False)
+        img = load_image("sound.png", convert=False, f='images')
     else:
         play_sound = False
-        img = load_image("no_sound.png", convert=False)
+        img = load_image("no_sound.png", convert=False, f='images')
     player = Player(100, 1000)
     img = pygame.transform.scale(img, (40, 40))
     running = True
@@ -267,12 +267,12 @@ def start_game(play_sound):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = event.pos
                 if (pos[0] > 880 and pos[0] < 980) and (pos[1] > 20 and pos[1] < 80) and play_sound:
-                    img = load_image("no_sound.png", convert=False)
+                    img = load_image("no_sound.png", convert=False, f='images')
                     play_sound = False
                     img = pygame.transform.scale(img, (40, 40))
                     sound.stop()
                 elif (pos[0] > 880 and pos[0] < 980) and (pos[1] > 20 and pos[1] < 80) and not play_sound:
-                    img = load_image("sound.png", convert=False)
+                    img = load_image("sound.png", convert=False, f='images')
                     play_sound = True
                     img = pygame.transform.scale(img, (40, 40))
                     sound.play()
