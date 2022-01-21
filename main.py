@@ -368,6 +368,8 @@ def start_game(play_sound):
         play_sound = False
         img = load_image("no_sound.png", convert=False, f='images')
     player = Player(350, 1600)
+    money_img = load_image("money_img.jpg", (255, 255, 255), f='images')
+    money_img = pygame.transform.scale(money_img, (40, 40))
     img = pygame.transform.scale(img, (40, 40))
     running = True
     clock = pygame.time.Clock()
@@ -401,6 +403,7 @@ def start_game(play_sound):
         big_obstacles_group.draw(screen)
         player_group.update()
         screen.blit(img, (900, 20))
+        screen.blit(money_img, (20, 20))
         pygame.display.flip()
         clock.tick(FPS)
 
