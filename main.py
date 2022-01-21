@@ -15,6 +15,7 @@ big_obstacles_group = pygame.sprite.Group()
 diamond_group = pygame.sprite.Group()
 size_sprite = {6: (90, 90), 15: (200, 200), 16: (200, 200), 17: (200, 200), 18: (200, 200), 20: (60, 60),
                24: (70, 160), 25: (70, 160), 27: (60, 60), 28: (60, 60), 29: (300, 300)}
+sprite_name = {6: 'box'}
 
 
 def load_image(name, color_key=None, convert=True, f='titles'):
@@ -194,12 +195,33 @@ class Diamond(pygame.sprite.Sprite):
         # self.image = pygame.transform.scale(self.image, (50, 50))
 
 
-class OreDeposits(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y):
+class PolylineObj(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y, name):
         super().__init__(all_sprites)
-        self.image = load_image('ore_deposits.png', (255, 255, 255))
+        self.image = load_image(f'{name}.png', (255, 255, 255))
         self.rect = self.image.get_rect().move(pos_x, pos_y)
         self.rect.center = (pos_x, pos_y)
+        self.life = 1000
+        self.name = name
+        self.x = pos_x
+        self.y = pos_y
+
+    def update(self):
+        if self.life < 10:
+            self.kill()
+        else:
+            if pygame.key.get_pressed()[pygame.K_e] and pygame.sprite.spritecollideany(self, player_group):
+                print(self.life)
+                self.life -= 5
+        if self.life != 1000:
+            if self.life > 750:
+                self.image = load_image(f'{self.name}_polyline.png', (255, 255, 255))
+            if 750 > self.life > 500:
+                self.image = load_image(f'{self.name}_medium_polyline.png', (255, 255, 255))
+            if 500 > self.life > 250:
+                self.image = load_image(f'{self.name}_more_polyline.png', (255, 255, 255))
+            if 250 > self.life > 90:
+                self.image = load_image(f'{self.name}_max_polyline.png', (255, 255, 255))
 
 
 class Ostrov:
@@ -230,10 +252,13 @@ class Ostrov:
                          obstacles_group)
                     self.obstacles.append((x, y))
                 if self.map_data.get_tile_image(x, y, 1) != None:
-                    BigTile(self.map_data.get_tile_image(x, y, 1), 550 + x * 56 - y * 56, 120 + x * 32 + y * 32,
-                            self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)],
-                            big_obstacles_group)
-                    self.obstacles.append((x, y))
+                    if self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)] != 6:
+                        BigTile(self.map_data.get_tile_image(x, y, 1), 550 + x * 56 - y * 56, 120 + x * 32 + y * 32,
+                                self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)],
+                                big_obstacles_group)
+                        self.obstacles.append((x, y))
+
+
         diaminds = random.randint(6, 50)
         for i in range(diaminds):
             x, y = random.randint(0, self.width), random.randint(0, self.height)
@@ -246,7 +271,7 @@ class Ostrov:
             x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
             while (x, y) in self.obstacles:
                 x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
-            OreDeposits(550 + x * 56 - y * 56, 120 + x * 32 + y * 32)
+            PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, 'ore_deposits')
         screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
         pygame.display.update()
         for event in pygame.event.get():
@@ -354,7 +379,7 @@ display = pygame.Surface((300, 300))
 startwin = StartWindow()
 startwin.draw()
 ostrov = Ostrov()
-#dow = Dowload()
-#dow.draw()
+# dow = Dowload()
+# dow.draw()
 ostrov.draw()
 start_game(play_sound)
