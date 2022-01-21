@@ -91,6 +91,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = pos_y
 
     def update(self):
+        global money
         self.rect.x -= 1
         if pygame.key.get_pressed()[pygame.K_a] and not pygame.sprite.spritecollideany(self, obstacles_group) \
                 and pygame.sprite.spritecollideany(
@@ -145,6 +146,7 @@ class Player(pygame.sprite.Sprite):
         if pygame.sprite.spritecollideany(self, diamond_group):
             self.money_sound.play()
             pygame.sprite.spritecollideany(self, diamond_group).kill()
+            money += 10
 
 
 class Dowload:
@@ -214,6 +216,7 @@ class PolylineObj(pygame.sprite.Sprite):
         self.f = 0
 
     def update(self):
+        global money
         if self.num and self.f == 1 and not (
                 pygame.key.get_pressed()[pygame.K_e] and pygame.sprite.spritecollideany(self, player_group)):
             self.f = 0
@@ -227,6 +230,7 @@ class PolylineObj(pygame.sprite.Sprite):
                 self.box_sound.stop()
             else:
                 self.rude_sound.stop()
+            money += 0 if random.choice([False, False, False, True]) else random.randint(5, 25)
             self.kill()
         else:
             if pygame.key.get_pressed()[pygame.K_e] and pygame.sprite.spritecollideany(self, player_group):
@@ -370,6 +374,7 @@ def start_game(play_sound):
     player = Player(350, 1600)
     money_img = load_image("money_img.jpg", (255, 255, 255), f='images')
     money_img = pygame.transform.scale(money_img, (40, 40))
+    money_fon = pygame.transform.scale(load_image("money_fon.png", (255, 255, 255), f='images'), (200, 80))
     img = pygame.transform.scale(img, (40, 40))
     running = True
     clock = pygame.time.Clock()
@@ -403,7 +408,11 @@ def start_game(play_sound):
         big_obstacles_group.draw(screen)
         player_group.update()
         screen.blit(img, (900, 20))
-        screen.blit(money_img, (20, 20))
+        screen.blit(money_fon, (0, 0))
+        font = pygame.font.Font(None, 50)
+        text = font.render(f"{str(money)}", True, (255, 255, 255))
+        screen.blit(text, (55, 25))
+        screen.blit(money_img, (10, 20))
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -414,12 +423,13 @@ sound.play()
 play_sound = True
 icon = pygame.image.load('data/images/din.png')
 pygame.display.set_icon(icon)
+money = 0
 screen = pygame.display.set_mode((1000, 650), 0, 32)
 display = pygame.Surface((300, 300))
 startwin = StartWindow()
 startwin.draw()
 ostrov = Ostrov()
-# dow = Dowload()
-# dow.draw()
+dow = Dowload()
+dow.draw()
 ostrov.draw()
 start_game(play_sound)
