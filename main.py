@@ -196,32 +196,64 @@ class Diamond(pygame.sprite.Sprite):
 
 
 class PolylineObj(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y, name):
-        super().__init__(all_sprites)
+    def __init__(self, pos_x, pos_y, name, num=False):
+        super().__init__(all_sprites, big_obstacles_group)
         self.image = load_image(f'{name}.png', (255, 255, 255))
         self.rect = self.image.get_rect().move(pos_x, pos_y)
         self.rect.center = (pos_x, pos_y)
+        self.num = num
+        if num:
+            self.image = pygame.transform.scale(self.image, size_sprite[num])
+            self.box_sound = pygame.mixer.Sound('data/musics/krack_box.mp3')
+        else:
+            self.rude_sound = pygame.mixer.Sound('data/musics/kirka_lomik.mp3')
         self.life = 1000
         self.name = name
         self.x = pos_x
         self.y = pos_y
+        self.f = 0
 
     def update(self):
+        if self.num and self.f == 1 and not (
+                pygame.key.get_pressed()[pygame.K_e] and pygame.sprite.spritecollideany(self, player_group)):
+            self.f = 0
+            self.box_sound.stop()
+        elif self.num is False and self.f == 2 and not (
+                pygame.key.get_pressed()[pygame.K_e] and pygame.sprite.spritecollideany(self, player_group)):
+            self.f = 0
+            self.rude_sound.stop()
         if self.life < 10:
+            if self.num:
+                self.box_sound.stop()
+            else:
+                self.rude_sound.stop()
             self.kill()
         else:
             if pygame.key.get_pressed()[pygame.K_e] and pygame.sprite.spritecollideany(self, player_group):
-                print(self.life)
-                self.life -= 5
+                self.life -= 2 if self.num else 5
+                if self.num and self.f == 0:
+                    self.box_sound.play()
+                    self.f = 1
+                if self.num is False and self.f == 0:
+                    self.rude_sound.play()
+                    self.f = 2
         if self.life != 1000:
             if self.life > 750:
                 self.image = load_image(f'{self.name}_polyline.png', (255, 255, 255))
+                if self.num:
+                    self.image = pygame.transform.scale(self.image, size_sprite[self.num])
             if 750 > self.life > 500:
                 self.image = load_image(f'{self.name}_medium_polyline.png', (255, 255, 255))
+                if self.num:
+                    self.image = pygame.transform.scale(self.image, size_sprite[self.num])
             if 500 > self.life > 250:
                 self.image = load_image(f'{self.name}_more_polyline.png', (255, 255, 255))
+                if self.num:
+                    self.image = pygame.transform.scale(self.image, size_sprite[self.num])
             if 250 > self.life > 90:
                 self.image = load_image(f'{self.name}_max_polyline.png', (255, 255, 255))
+                if self.num:
+                    self.image = pygame.transform.scale(self.image, size_sprite[self.num])
 
 
 class Ostrov:
@@ -257,7 +289,9 @@ class Ostrov:
                                 self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)],
                                 big_obstacles_group)
                         self.obstacles.append((x, y))
-
+                    elif self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)] == 6:
+                        PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, 'box_title',
+                                    self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)])
 
         diaminds = random.randint(6, 50)
         for i in range(diaminds):
@@ -271,7 +305,10 @@ class Ostrov:
             x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
             while (x, y) in self.obstacles:
                 x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
-            PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, 'ore_deposits')
+            p = PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, 'ore_deposits')
+            if not pygame.sprite.spritecollideany(p, tiles_group):
+                p.kill()
+                ore += 1
         screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
         pygame.display.update()
         for event in pygame.event.get():
