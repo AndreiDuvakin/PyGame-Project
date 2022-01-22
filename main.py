@@ -91,7 +91,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = pos_y
 
     def update(self):
-        global count
+        global money
         self.rect.x -= 1
         if pygame.key.get_pressed()[pygame.K_a] and not pygame.sprite.spritecollideany(self, obstacles_group) \
                 and pygame.sprite.spritecollideany(
@@ -146,7 +146,7 @@ class Player(pygame.sprite.Sprite):
         if pygame.sprite.spritecollideany(self, diamond_group):
             self.money_sound.play()
             pygame.sprite.spritecollideany(self, diamond_group).kill()
-            count += 10
+            money += 10
 
 
 class Dowload:
@@ -198,35 +198,68 @@ class Diamond(pygame.sprite.Sprite):
 
 
 class PolylineObj(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y, name):
-        super().__init__(all_sprites)
+    def __init__(self, pos_x, pos_y, name, num=False):
+        super().__init__(all_sprites, big_obstacles_group)
         self.image = load_image(f'{name}.png', (255, 255, 255))
         self.rect = self.image.get_rect().move(pos_x, pos_y)
         self.rect.center = (pos_x, pos_y)
+        self.num = num
+        self.sound_money = pygame.mixer.Sound('data/musics/pick_up_money.mp3')
+        if num:
+            self.image = pygame.transform.scale(self.image, size_sprite[num])
+            self.box_sound = pygame.mixer.Sound('data/musics/krack_box.mp3')
+        else:
+            self.rude_sound = pygame.mixer.Sound('data/musics/kirka_lomik.mp3')
         self.life = 1000
         self.name = name
         self.x = pos_x
         self.y = pos_y
+        self.f = 0
 
     def update(self):
-        global count
+        global money
+        if self.num and self.f == 1 and not (
+                pygame.key.get_pressed()[pygame.K_e] and pygame.sprite.spritecollideany(self, player_group)):
+            self.f = 0
+            self.box_sound.stop()
+        elif self.num is False and self.f == 2 and not (
+                pygame.key.get_pressed()[pygame.K_e] and pygame.sprite.spritecollideany(self, player_group)):
+            self.f = 0
+            self.rude_sound.stop()
         if self.life < 10:
+            if self.num:
+                self.box_sound.stop()
+            else:
+                self.rude_sound.stop()
+            money += 0 if random.choice([False, False, False, True]) else random.randint(5, 25)
             self.kill()
-            if random.choice([True, False]):
-                count += random.randint(2, 25)
+            self.sound_money.play()
         else:
             if pygame.key.get_pressed()[pygame.K_e] and pygame.sprite.spritecollideany(self, player_group):
-                print(self.life)
-                self.life -= 5
+                self.life -= 2 if self.num else 5
+                if self.num and self.f == 0:
+                    self.box_sound.play()
+                    self.f = 1
+                if self.num is False and self.f == 0:
+                    self.rude_sound.play()
+                    self.f = 2
         if self.life != 1000:
             if self.life > 750:
                 self.image = load_image(f'{self.name}_polyline.png', (255, 255, 255))
+                if self.num:
+                    self.image = pygame.transform.scale(self.image, size_sprite[self.num])
             if 750 > self.life > 500:
                 self.image = load_image(f'{self.name}_medium_polyline.png', (255, 255, 255))
+                if self.num:
+                    self.image = pygame.transform.scale(self.image, size_sprite[self.num])
             if 500 > self.life > 250:
                 self.image = load_image(f'{self.name}_more_polyline.png', (255, 255, 255))
+                if self.num:
+                    self.image = pygame.transform.scale(self.image, size_sprite[self.num])
             if 250 > self.life > 90:
                 self.image = load_image(f'{self.name}_max_polyline.png', (255, 255, 255))
+                if self.num:
+                    self.image = pygame.transform.scale(self.image, size_sprite[self.num])
 
 
 class Ostrov:
@@ -262,7 +295,9 @@ class Ostrov:
                                 self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)],
                                 big_obstacles_group)
                         self.obstacles.append((x, y))
-
+                    elif self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)] == 6:
+                        PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, 'box_title',
+                                    self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)])
 
         diaminds = random.randint(6, 50)
         for i in range(diaminds):
@@ -276,7 +311,10 @@ class Ostrov:
             x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
             while (x, y) in self.obstacles:
                 x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
-            PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, 'ore_deposits')
+            p = PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, 'ore_deposits')
+            if not pygame.sprite.spritecollideany(p, tiles_group):
+                p.kill()
+                ore += 1
         screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
         pygame.display.update()
         for event in pygame.event.get():
@@ -338,6 +376,7 @@ def start_game(play_sound):
     player = Player(350, 1600)
     money_img = load_image("money_img.jpg", (255, 255, 255), f='images')
     money_img = pygame.transform.scale(money_img, (40, 40))
+    money_fon = pygame.transform.scale(load_image("money_fon.png", (255, 255, 255), f='images'), (200, 80))
     img = pygame.transform.scale(img, (40, 40))
     running = True
     clock = pygame.time.Clock()
@@ -371,7 +410,11 @@ def start_game(play_sound):
         big_obstacles_group.draw(screen)
         player_group.update()
         screen.blit(img, (900, 20))
-        screen.blit(money_img, (20, 20))
+        screen.blit(money_fon, (0, 0))
+        font = pygame.font.Font(None, 50)
+        text = font.render(f"{str(money)}", True, (255, 255, 255))
+        screen.blit(text, (55, 25))
+        screen.blit(money_img, (10, 20))
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -380,15 +423,15 @@ pygame.display.set_caption('DinosaurSettlement')
 sound = pygame.mixer.Sound('data/musics/Music.mp3')
 sound.play()
 play_sound = True
-count = 0
 icon = pygame.image.load('data/images/din.png')
 pygame.display.set_icon(icon)
+money = 0
 screen = pygame.display.set_mode((1000, 650), 0, 32)
 display = pygame.Surface((300, 300))
 startwin = StartWindow()
 startwin.draw()
 ostrov = Ostrov()
-# dow = Dowload()
-# dow.draw()
+dow = Dowload()
+dow.draw()
 ostrov.draw()
 start_game(play_sound)
