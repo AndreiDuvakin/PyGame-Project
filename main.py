@@ -4,6 +4,7 @@ from pygame.locals import *
 import os
 import pytmx
 import random
+import sqlite3
 
 FPS = 120
 pygame.init()
@@ -264,7 +265,12 @@ class PolylineObj(pygame.sprite.Sprite):
 
 class Ostrov:
     def __init__(self):
-        self.map_data = pytmx.load_pygame('data/maps/map.tmx')  # [[c for c in row] for row in f.read().split('\n')]
+        global level
+        if level == 1:
+            self.map_data = pytmx.load_pygame('data/maps/map.tmx')  # [[c for c in row] for row in f.read().split('\n')]
+        elif level == 2:
+            self.map_data = pytmx.load_pygame('data/maps/map2.tmx')
+
 
     def draw(self):
         # while True:
@@ -366,6 +372,28 @@ class Camera:
         self.dy = -(target.rect.y + target.rect.h // 2 - 650 // 2)
 
 
+def read_base():
+    con = sqlite3.connect("data/base/data.sqlite")
+    cur = con.cursor()
+    result = cur.execute("""SELECT * FROM main""").fetchall()
+    if not result:
+        level = 1
+        money = 0
+    else:
+        level = int(result[-1][1])
+        money = int(result[-1][2])
+    return level, money
+
+
+def insert_base(level, money):
+    con = sqlite3.connect("data/base/data.sqlite")
+    cur = con.cursor()
+    cur.execute("""INSERT INTO main(level, money, progress, datatime, sessiontime, actions) VALUES(?, ?, 0, 0, 0, 0)""",
+                (item_id := int(level), int(money), ))
+    con.commit()
+    con.close()
+
+
 def start_game(play_sound):
     if play_sound:
         play_sound = True
@@ -387,6 +415,7 @@ def start_game(play_sound):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                insert_base(level, money)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = event.pos
                 if (pos[0] > 880 and pos[0] < 980) and (pos[1] > 20 and pos[1] < 80) and play_sound:
@@ -411,9 +440,9 @@ def start_game(play_sound):
         player_group.update()
         screen.blit(img, (900, 20))
         screen.blit(money_fon, (0, 0))
-        font = pygame.font.Font(None, 50)
+        font = pygame.font.Font('data/fonts/font.otf', 50)
         text = font.render(f"{str(money)}", True, (255, 255, 255))
-        screen.blit(text, (55, 25))
+        screen.blit(text, (55, 20))
         screen.blit(money_img, (10, 20))
         pygame.display.flip()
         clock.tick(FPS)
@@ -425,9 +454,9 @@ sound.play()
 play_sound = True
 icon = pygame.image.load('data/images/din.png')
 pygame.display.set_icon(icon)
-money = 0
 screen = pygame.display.set_mode((1000, 650), 0, 32)
 display = pygame.Surface((300, 300))
+level, money = read_base()
 startwin = StartWindow()
 startwin.draw()
 ostrov = Ostrov()
