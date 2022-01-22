@@ -6,7 +6,7 @@ import pytmx
 import random
 import sqlite3
 
-FPS = 120
+FPS = 130
 pygame.init()
 all_sprites = pygame.sprite.Group()
 obstacles_group = pygame.sprite.Group()
@@ -14,10 +14,15 @@ tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 big_obstacles_group = pygame.sprite.Group()
 diamond_group = pygame.sprite.Group()
-titles = [[9, 10, 6, 31, 33], [7, 11, 32], [15, 16, 17, 18, 20, 24, 25, 27, 28, 29, 36], [6]]
+house_group = pygame.sprite.Group()
+titles = [[9, 10, 31, 33], [7, 11, 32], [20, 24, 25, 27, 28, 29, 36], [6, 20], [15, 16, 17, 18]]
 size_sprite = {6: (90, 90), 15: (200, 200), 16: (200, 200), 17: (200, 200), 18: (200, 200), 20: (60, 60),
                24: (70, 160), 25: (70, 160), 27: (60, 60), 28: (60, 60), 29: (300, 300)}
 sprite_name = {6: 'box'}
+house_count = 0
+house_buy = 0
+con = sqlite3.connect("data/base/data.sqlite")
+cur = con.cursor()
 
 
 def load_image(name, color_key=None, convert=True, f='titles'):
@@ -264,6 +269,98 @@ class PolylineObj(pygame.sprite.Sprite):
                     self.image = pygame.transform.scale(self.image, size_sprite[self.num])
 
 
+class House(pygame.sprite.Sprite):
+    def __init__(self, imge, pos_x, pos_y, num, levels):
+        global house_count
+        super().__init__(all_sprites, house_group, big_obstacles_group)
+        sixe = size_sprite[num]
+        self.image = pygame.transform.scale(imge, sixe)
+        self.rect = self.image.get_rect().move(pos_x, pos_y)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.center = (pos_x, pos_y)
+        self.number = house_count
+        try:
+            con = sqlite3.connect("data/base/data.sqlite")
+            cur = con.cursor()
+            self.income = cur.execute(f"SELECT income from house WHERE"
+                                      f" level = {str(levels)} and number = {self.number}").fetchall()[0][0]
+            self.sold = True
+        except IndexError:
+            self.sold = False
+            self.income = 0
+            self.price = (house_buy + 1) * 100
+        self.font = pygame.font.Font('data/fonts/Impact.ttf', 15)
+        self.big_font = pygame.font.Font('data/fonts/Impact.ttf', 30)
+        self.normal_font = pygame.font.Font('data/fonts/Impact.ttf', 18)
+        self.clock = pygame.time.Clock()
+
+    def update(self):
+        global money
+        global house_buy
+        if self.sold:
+            money += self.income / 60
+        if pygame.sprite.spritecollideany(self, player_group):
+            screen.blit(load_image('fon_board_house.png', (0, 0, 0), f='images'), (self.rect.x - 170, self.rect.y + 40))
+            if self.sold:
+                screen.blit(self.font.render(
+                    f"Этот дом ваш!",
+                    True, (255, 255, 255)), (self.rect.x - 160, self.rect.y + 60))
+                screen.blit(self.font.render(
+                    f"Ваш доход: {self.income}",
+                    True, (255, 255, 255)), (self.rect.x - 160, self.rect.y + 60))
+            else:
+                text = self.font.render(
+                    f"Этот дом еще не куплен!",
+                    True, (255, 255, 255))
+                text1 = self.font.render(
+                    f"Купите его и",
+                    True, (255, 255, 255))
+                text2 = self.font.render(
+                    f"получайте доход",
+                    True, (255, 255, 255))
+                text3 = self.font.render(
+                    f"1 монетку в секунду",
+                    True, (255, 255, 255))
+                screen.blit(text, (self.rect.x - 160, self.rect.y + 60))
+                screen.blit(text1, (self.rect.x - 120, self.rect.y + 75))
+                screen.blit(text2, (self.rect.x - 135, self.rect.y + 90))
+                screen.blit(text3, (self.rect.x - 145, self.rect.y + 105))
+                if money - self.price >= 0:
+                    screen.blit(self.big_font.render(
+                        f"{str(self.price)}",
+                        True, (234, 239, 91)), (self.rect.x - 120, self.rect.y + 175))
+                    screen.blit(
+                        pygame.transform.scale(load_image('money_img.jpg', (255, 255, 255), f='images'), (30, 30)),
+                        (self.rect.x - 160, self.rect.y + 180))
+                    screen.blit(pygame.transform.scale(load_image('buy_button.png', (0, 0, 0), f='images'), (185, 75)),
+                                (self.rect.x - 170, self.rect.y + 115))
+                    button_cor = list(
+                        set(list(
+                            map(lambda x: x.pos if x.type == pygame.MOUSEBUTTONDOWN else False, pygame.event.get()))))
+                    if button_cor != []:
+                        if button_cor[0] != False:
+                            x, y = button_cor[0]
+                            if self.rect.x - 170 < x < self.rect.x + 15 and self.rect.y + 115 < y < self.rect.y + 190:
+                                self.sold = True
+                                self.income = 1
+                                cur.execute(
+                                    f"""INSERT INTO house(level, number, income)
+                                 VALUES({str(level)}, {str(self.number)}, {str(self.income)})""")
+                                con.commit()
+                                money -= self.price
+                                house_buy += 1
+
+                screen.blit(pygame.transform.scale(load_image('buy_button.png', (0, 0, 0), f='images'), (185, 75)),
+                            (self.rect.x - 170, self.rect.y + 115))
+                if money - self.price <= 0:
+                    screen.blit(self.normal_font.render(
+                        f"Недостаточно монет!",
+                        True, (255, 0, 0)), (self.rect.x - 160, self.rect.y + 175))
+                    screen.blit(self.font.render(
+                        f"Необходимо {str(self.price)} монет",
+                        True, (234, 239, 91)), (self.rect.x - 160, self.rect.y + 195))
+
+
 class Ostrov:
     def __init__(self):
         global level
@@ -273,7 +370,7 @@ class Ostrov:
             self.map_data = pytmx.load_pygame('data/maps/map2.tmx')
 
     def draw(self):
-        # while True:
+        global house_count
         display.fill((0, 0, 0))
         self.height = self.map_data.height
         self.width = self.map_data.width
@@ -298,6 +395,10 @@ class Ostrov:
                     elif self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)] in titles[3]:
                         PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, 'box_title',
                                     self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)])
+                    elif self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)] in titles[4]:
+                        House(self.map_data.get_tile_image(x, y, 1), 550 + x * 56 - y * 56, 120 + x * 32 + y * 32,
+                              self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)], level)
+                        house_count += 1
 
         diaminds = random.randint(6, 50)
         for i in range(diaminds):
@@ -435,7 +536,7 @@ def start_game(play_sound):
         screen.blit(img, (900, 20))
         screen.blit(money_fon, (0, 0))
         font = pygame.font.Font('data/fonts/font.otf', 50)
-        text = font.render(f"{str(money)}", True, (255, 255, 255))
+        text = font.render(f"{str(int(money))}", True, (255, 255, 255))
         screen.blit(text, (66, 4))
         screen.blit(money_img, (30, 10))
         pygame.display.flip()
