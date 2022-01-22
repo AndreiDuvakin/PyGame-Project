@@ -454,6 +454,7 @@ sound.play()
 play_sound = True
 icon = pygame.image.load('data/images/din.png')
 pygame.display.set_icon(icon)
+money = 0
 screen = pygame.display.set_mode((1000, 650), 0, 32)
 display = pygame.Surface((300, 300))
 level, money = read_base()
