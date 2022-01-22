@@ -14,6 +14,7 @@ tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 big_obstacles_group = pygame.sprite.Group()
 diamond_group = pygame.sprite.Group()
+titles = [[9, 10, 6, 31, 33], [7, 11, 32], [15, 16, 17, 18, 20, 24, 25, 27, 28, 29, 36], [6]]
 size_sprite = {6: (90, 90), 15: (200, 200), 16: (200, 200), 17: (200, 200), 18: (200, 200), 20: (60, 60),
                24: (70, 160), 25: (70, 160), 27: (60, 60), 28: (60, 60), 29: (300, 300)}
 sprite_name = {6: 'box'}
@@ -271,7 +272,6 @@ class Ostrov:
         elif level == 2:
             self.map_data = pytmx.load_pygame('data/maps/map2.tmx')
 
-
     def draw(self):
         # while True:
         display.fill((0, 0, 0))
@@ -281,27 +281,21 @@ class Ostrov:
         self.tiles = []
         for y in range(self.height):
             for x in range(self.width):
-                if self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 0)] == 10 or \
-                        self.map_data.tiledgidmap[
-                            self.map_data.get_tile_gid(x, y, 0)] == 9 or \
-                        self.map_data.tiledgidmap[
-                            self.map_data.get_tile_gid(x, y, 0)] == 6:
+                if self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 0)] in titles[0]:
                     Tile(self.map_data.get_tile_image(x, y, 0), 550 + x * 56 - y * 56, 120 + x * 32 + y * 32,
                          tiles_group)
                     self.tiles.append((x, y))
-                if self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 0)] == 11 or \
-                        self.map_data.tiledgidmap[
-                            self.map_data.get_tile_gid(x, y, 0)] == 7:
+                if self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 0)] in titles[1]:
                     Tile(self.map_data.get_tile_image(x, y, 0), 550 + x * 56 - y * 56, 120 + x * 32 + y * 32,
                          obstacles_group)
                     self.obstacles.append((x, y))
                 if self.map_data.get_tile_image(x, y, 1) != None:
-                    if self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)] != 6:
+                    if self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)] in titles[2]:
                         BigTile(self.map_data.get_tile_image(x, y, 1), 550 + x * 56 - y * 56, 120 + x * 32 + y * 32,
                                 self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)],
                                 big_obstacles_group)
                         self.obstacles.append((x, y))
-                    elif self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)] == 6:
+                    elif self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)] in titles[3]:
                         PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, 'box_title',
                                     self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)])
 
@@ -372,6 +366,97 @@ class Camera:
         self.dy = -(target.rect.y + target.rect.h // 2 - 650 // 2)
 
 
+def instruction1():
+    image_din = pygame.transform.scale(load_image("dop_din.png", (255, 255, 255), f='images'), (110, 100))
+    image_cat = pygame.transform.scale(load_image("dop_cat.png", (255, 255, 255), f='images'), (130, 120))
+    image_strel = pygame.transform.scale(load_image("strelochka.png", (0, 0, 0), f='images'), (70, 70))
+
+    intro_text = ["Добро пожаловать в поселение динозавров :з",
+                  "Игра посвящается преподавателю, который всегда готов был нам помочь и научить нас...",
+                  "",
+                  "Для успешной игры рекомендуем вам изучить правила игры и основные положения"]
+    opis_text = ["Главный персонаж, динозаврик, которым управлять будете вы ^-^",
+                 "Еще один главный персонаж, милый котик, который будет давать задания ^-^"]
+
+    display.fill((255, 248, 231))
+    screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
+
+    font = pygame.font.Font('data/fonts/font.otf', 70)
+    text = font.render("Instruction", True, (171, 195, 87))
+
+    screen.blit(text, (320, 4))
+    screen.blit(image_din, (15, 230))
+    screen.blit(image_cat, (15, 350))
+    screen.blit(image_strel, (900, 550))
+
+    font2 = pygame.font.Font('data/fonts/dop_font.otf', 25)
+    text_coord = 50
+    for line in intro_text:
+        string_rendered = font2.render(line, True, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+        pygame.display.update()
+
+    text_coord = 190
+    for line in opis_text:
+        string_rendered = font2.render(line, True, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 110
+        intro_rect.top = text_coord
+        intro_rect.x = 150
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+        pygame.display.update()
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    instruction2()
+                    running = False
+
+
+def instruction2():
+    image_strel = pygame.transform.scale(load_image("strelochka.png", (0, 0, 0), f='images'), (70, 70))
+    display.fill((255, 248, 231))
+    screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
+    font = pygame.font.Font('data/fonts/font.otf', 70)
+    text = font.render("Instruction", True, (171, 195, 87))
+    screen.blit(text, (320, 4))
+    screen.blit(image_strel, (900, 550))
+    pygame.display.update()
+    opis_text = ["Цель этой игры - заработать как можно больше монеток, чтобы развиваться дальше",
+                 "Сейчас вы спросите как же это сделать :з",
+                 "Давайте посмотрим"]
+    font2 = pygame.font.Font('data/fonts/dop_font.otf', 25)
+    text_coord = 50
+    for line in opis_text:
+        string_rendered = font2.render(line, True, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+        pygame.display.update()
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    running = False
+
+
 def read_base():
     con = sqlite3.connect("data/base/data.sqlite")
     cur = con.cursor()
@@ -389,7 +474,7 @@ def insert_base(level, money):
     con = sqlite3.connect("data/base/data.sqlite")
     cur = con.cursor()
     cur.execute("""INSERT INTO main(level, money, progress, datatime, sessiontime, actions) VALUES(?, ?, 0, 0, 0, 0)""",
-                (item_id := int(level), int(money), ))
+                (item_id := int(level), int(money),))
     con.commit()
     con.close()
 
@@ -403,8 +488,8 @@ def start_game(play_sound):
         img = load_image("no_sound.png", convert=False, f='images')
     player = Player(350, 1600)
     money_img = load_image("money_img.jpg", (255, 255, 255), f='images')
-    money_img = pygame.transform.scale(money_img, (40, 40))
-    money_fon = pygame.transform.scale(load_image("money_fon.png", (255, 255, 255), f='images'), (200, 80))
+    money_img = pygame.transform.scale(money_img, (30, 30))
+    money_fon = pygame.transform.scale(load_image("new_money_fon.png", (0, 0, 0), f='images'), (350, 50))
     img = pygame.transform.scale(img, (40, 40))
     running = True
     clock = pygame.time.Clock()
@@ -442,8 +527,8 @@ def start_game(play_sound):
         screen.blit(money_fon, (0, 0))
         font = pygame.font.Font('data/fonts/font.otf', 50)
         text = font.render(f"{str(money)}", True, (255, 255, 255))
-        screen.blit(text, (55, 20))
-        screen.blit(money_img, (10, 20))
+        screen.blit(text, (66, 4))
+        screen.blit(money_img, (30, 10))
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -460,6 +545,7 @@ display = pygame.Surface((300, 300))
 level, money = read_base()
 startwin = StartWindow()
 startwin.draw()
+instruction1()
 ostrov = Ostrov()
 dow = Dowload()
 dow.draw()
