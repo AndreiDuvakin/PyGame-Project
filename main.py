@@ -369,6 +369,7 @@ class Ostrov:
         elif level == 2:
             self.map_data = pytmx.load_pygame('data/maps/map2.tmx')
 
+
     def draw(self):
         global house_count
         display.fill((0, 0, 0))
@@ -467,6 +468,97 @@ class Camera:
         self.dy = -(target.rect.y + target.rect.h // 2 - 650 // 2)
 
 
+def instruction1():
+    image_din = pygame.transform.scale(load_image("dop_din.png", (255, 255, 255), f='images'), (110, 100))
+    image_cat = pygame.transform.scale(load_image("dop_cat.png", (255, 255, 255), f='images'), (130, 120))
+    image_strel = pygame.transform.scale(load_image("strelochka.png", (0, 0, 0), f='images'), (70, 70))
+
+    intro_text = ["Добро пожаловать в поселение динозавров :з",
+                  "Игра посвящается преподавателю, который всегда готов был нам помочь и научить нас...",
+                  "",
+                  "Для успешной игры рекомендуем вам изучить правила игры и основные положения"]
+    opis_text = ["Главный персонаж, динозаврик, которым управлять будете вы ^-^",
+                 "Еще один главный персонаж, милый котик, который будет давать задания ^-^"]
+
+    display.fill((255, 248, 231))
+    screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
+
+    font = pygame.font.Font('data/fonts/font.otf', 70)
+    text = font.render("Instruction", True, (171, 195, 87))
+
+    screen.blit(text, (320, 4))
+    screen.blit(image_din, (15, 230))
+    screen.blit(image_cat, (15, 350))
+    screen.blit(image_strel, (900, 550))
+
+    font2 = pygame.font.Font('data/fonts/dop_font.otf', 25)
+    text_coord = 50
+    for line in intro_text:
+        string_rendered = font2.render(line, True, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+        pygame.display.update()
+
+    text_coord = 190
+    for line in opis_text:
+        string_rendered = font2.render(line, True, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 110
+        intro_rect.top = text_coord
+        intro_rect.x = 150
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+        pygame.display.update()
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    instruction2()
+                    running = False
+
+
+def instruction2():
+    image_strel = pygame.transform.scale(load_image("strelochka.png", (0, 0, 0), f='images'), (70, 70))
+    display.fill((255, 248, 231))
+    screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
+    font = pygame.font.Font('data/fonts/font.otf', 70)
+    text = font.render("Instruction", True, (171, 195, 87))
+    screen.blit(text, (320, 4))
+    screen.blit(image_strel, (900, 550))
+    pygame.display.update()
+    opis_text = ["Цель этой игры - заработать как можно больше монеток, чтобы развиваться дальше",
+                 "Сейчас вы спросите как же это сделать :з",
+                 "Давайте посмотрим"]
+    font2 = pygame.font.Font('data/fonts/dop_font.otf', 25)
+    text_coord = 50
+    for line in opis_text:
+        string_rendered = font2.render(line, True, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+        pygame.display.update()
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    running = False
+
+
 def read_base():
     con = sqlite3.connect("data/base/data.sqlite")
     cur = con.cursor()
@@ -555,6 +647,7 @@ display = pygame.Surface((300, 300))
 level, money = read_base()
 startwin = StartWindow()
 startwin.draw()
+instruction1()
 ostrov = Ostrov()
 dow = Dowload()
 dow.draw()
