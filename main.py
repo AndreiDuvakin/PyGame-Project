@@ -88,13 +88,14 @@ class StartWindow:
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
-        self.image = load_image('din11.png', (255, 255, 255), f='images')
+        self.image = load_image('an_dino_1.png', (255, 255, 255), f='images')
+        self.image = pygame.transform.scale(self.image, (70, int(70 * 0.8211)))
         self.rect = self.image.get_rect()
-        self.image = pygame.transform.scale(self.image, (70, 70))
         self.mask = pygame.mask.from_surface(self.image)
         self.money_sound = pygame.mixer.Sound('data/musics/pick_up_money.mp3')
         self.rect.x = pos_x
         self.rect.y = pos_y
+        self.stor = False
 
     def update(self):
         global money
@@ -107,8 +108,14 @@ class Player(pygame.sprite.Sprite):
                     self.rect.x += 1
                 else:
                     self.rect.x -= 1
+                    if self.stor:
+                        self.stor = False
+                        self.image = pygame.transform.flip(self.image, True, False)
             else:
                 self.rect.x -= 1
+                if self.stor:
+                    self.stor = False
+                    self.image = pygame.transform.flip(self.image, True, False)
         else:
             self.rect.x += 1
         self.rect.x += 1
@@ -121,8 +128,14 @@ class Player(pygame.sprite.Sprite):
                     self.rect.x -= 1
                 else:
                     self.rect.x += 1
+                    if not self.stor:
+                        self.stor = True
+                        self.image = pygame.transform.flip(self.image, True, False)
             else:
                 self.rect.x += 1
+                if not self.stor:
+                    self.stor = True
+                    self.image = pygame.transform.flip(self.image, True, False)
         else:
             self.rect.x -= 1
         self.rect.y -= 1
@@ -335,8 +348,8 @@ class House(pygame.sprite.Sprite):
             if self.sold:
                 screen.blit(self.text4, (self.rect.x - 160, self.rect.y + 60))
                 screen.blit(self.font.render(
-            f"Ваш доход: {self.income}",
-            True, (255, 255, 255)), (self.rect.x - 160, self.rect.y + 75))
+                    f"Ваш доход: {self.income}",
+                    True, (255, 255, 255)), (self.rect.x - 160, self.rect.y + 75))
                 if self.income < 10:
                     self.price_upgrate = (house_buy + self.income) * 1000 * 1.5
                     screen.blit(self.up_but,
@@ -527,6 +540,7 @@ class Camera:
         self.dx = -(target.rect.x + target.rect.w // 2 - 1000 // 2)
         self.dy = -(target.rect.y + target.rect.h // 2 - 650 // 2)
 
+
 class Instruction:
     def __init__(self):
         self.click_sound = pygame.mixer.Sound('data/musics/button_sound.mp3')
@@ -562,7 +576,6 @@ class Instruction:
         image_din = pygame.transform.scale(load_image("dop_din.png", (255, 255, 255), f='images'), (110, 100))
         image_cat = pygame.transform.scale(load_image("dop_cat.png", (255, 255, 255), f='images'), (130, 120))
 
-
         intro_text = ["Добро пожаловать в поселение динозавров :з",
                       "Игра посвящается преподавателю, который всегда готов был нам помочь и научить нас...",
                       "",
@@ -592,7 +605,6 @@ class Instruction:
             self.text_coord += 0
         self.running()
 
-
     def instruction2(self):
         image_diam = pygame.transform.scale(load_image("dop_diamond.png", (255, 255, 255), f='images'), (90, 100))
         image_depos = pygame.transform.scale(load_image("dop_deposits.png", (255, 255, 255), f='images'), (90, 100))
@@ -610,7 +622,7 @@ class Instruction:
                      "Сейчас вы спросите как же это сделать :з",
                      "Давайте посмотрим"]
         diamon_text = ["Это алмазик, собирая его вы будете получать 10 монеток за каждый",
-                      "Чтобы взять алмазик, просто подойдите к нему"]
+                       "Чтобы взять алмазик, просто подойдите к нему"]
         depos_text = ["А это руда. Но ее не так просто собрать",
                       "Чтобы собрать руду, подойдите к ней и зажмите 'E' на английской раскладке",
                       "За руду вы можете не получить ничего или в диапозоне от 5 до 25 монеток"]
