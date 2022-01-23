@@ -410,9 +410,10 @@ class PolylineObj(pygame.sprite.Sprite):
             self.kill()
             self.sound_money.play()
             if self.num:
-                cat.ore += 1
-            else:
                 cat.box += 1
+            else:
+                cat.ore += 1
+
         else:
             if pygame.key.get_pressed()[pygame.K_e] and pygame.sprite.spritecollideany(self, player_group):
                 self.life -= 2 if self.num else 5
