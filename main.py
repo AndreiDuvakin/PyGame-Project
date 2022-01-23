@@ -365,96 +365,114 @@ class Camera:
         self.dx = -(target.rect.x + target.rect.w // 2 - 1000 // 2)
         self.dy = -(target.rect.y + target.rect.h // 2 - 650 // 2)
 
+class Instruction:
+    def __init__(self):
+        self.click_sound = pygame.mixer.Sound('data/musics/button_sound.mp3')
+        self.image_strel = pygame.transform.scale(load_image("strelochka.png", (0, 0, 0), f='images'), (70, 70))
+        self.font = pygame.font.Font('data/fonts/font.otf', 70)
+        self.text = self.font.render("Instruction", True, (171, 195, 87))
+        self.font2 = pygame.font.Font('data/fonts/dop_font.otf', 25)
+        self.text_coord = 50
+        self.count = 0
 
-def instruction1():
-    image_din = pygame.transform.scale(load_image("dop_din.png", (255, 255, 255), f='images'), (110, 100))
-    image_cat = pygame.transform.scale(load_image("dop_cat.png", (255, 255, 255), f='images'), (130, 120))
-    image_strel = pygame.transform.scale(load_image("strelochka.png", (0, 0, 0), f='images'), (70, 70))
+    def running(self):
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RIGHT:
+                        if self.count == 1:
+                            self.click_sound.play()
+                            self.instruction2()
+                            running = False
+                        elif self.count == 2:
+                            self.click_sound.play()
+                            running = False
 
-    intro_text = ["Добро пожаловать в поселение динозавров :з",
-                  "Игра посвящается преподавателю, который всегда готов был нам помочь и научить нас...",
-                  "",
-                  "Для успешной игры рекомендуем вам изучить правила игры и основные положения"]
-    opis_text = ["Главный персонаж, динозаврик, которым управлять будете вы ^-^",
-                 "Еще один главный персонаж, милый котик, который будет давать задания ^-^"]
+    def instruction1(self):
+        self.count = 1
+        display.fill((255, 248, 231))
+        screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
 
-    display.fill((255, 248, 231))
-    screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
+        image_din = pygame.transform.scale(load_image("dop_din.png", (255, 255, 255), f='images'), (110, 100))
+        image_cat = pygame.transform.scale(load_image("dop_cat.png", (255, 255, 255), f='images'), (130, 120))
 
-    font = pygame.font.Font('data/fonts/font.otf', 70)
-    text = font.render("Instruction", True, (171, 195, 87))
 
-    screen.blit(text, (320, 4))
-    screen.blit(image_din, (15, 230))
-    screen.blit(image_cat, (15, 350))
-    screen.blit(image_strel, (900, 550))
+        intro_text = ["Добро пожаловать в поселение динозавров :з",
+                      "Игра посвящается преподавателю, который всегда готов был нам помочь и научить нас...",
+                      "",
+                      "Для успешной игры рекомендуем вам изучить правила игры и основные положения"]
+        opis_text = ["Главный персонаж, динозаврик, которым управлять будете вы ^-^",
+                     "Еще один главный персонаж, милый котик, который будет давать задания ^-^"]
 
-    font2 = pygame.font.Font('data/fonts/dop_font.otf', 25)
-    text_coord = 50
-    for line in intro_text:
-        string_rendered = font2.render(line, True, pygame.Color('black'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
+        screen.blit(self.text, (320, 4))
+        screen.blit(image_din, (15, 230))
+        screen.blit(image_cat, (15, 350))
+        screen.blit(self.image_strel, (900, 550))
+        texts = [intro_text, opis_text]
+        for i in texts:
+            for line in i:
+                string_rendered = self.font2.render(line, True, pygame.Color('black'))
+                intro_rect = string_rendered.get_rect()
+                if i == intro_text:
+                    intro_rect.x = 10
+                    self.text_coord += 10
+                else:
+                    intro_rect.x = 150
+                    self.text_coord += 100
+                intro_rect.top = self.text_coord
+                self.text_coord += intro_rect.height
+                screen.blit(string_rendered, intro_rect)
+                pygame.display.update()
+            self.text_coord += 0
+        self.running()
+
+
+    def instruction2(self):
+        image_diam = pygame.transform.scale(load_image("dop_diamond.png", (255, 255, 255), f='images'), (90, 100))
+        image_depos = pygame.transform.scale(load_image("dop_deposits.png", (255, 255, 255), f='images'), (90, 100))
+        image_box = pygame.transform.scale(load_image("dop_box.png", (255, 255, 255), f='images'), (90, 100))
+        self.count = 2
+        display.fill((255, 248, 231))
+        screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
+        screen.blit(self.text, (320, 4))
+        screen.blit(self.image_strel, (900, 550))
+        screen.blit(image_diam, (15, 190))
+        screen.blit(image_depos, (15, 320))
+        screen.blit(image_box, (15, 450))
         pygame.display.update()
+        opis_text = ["Цель этой игры - заработать как можно больше монеток, чтобы развиваться дальше",
+                     "Сейчас вы спросите как же это сделать :з",
+                     "Давайте посмотрим"]
+        diamon_text = ["Это алмазик, собирая его вы будете получать 10 монеток за каждый",
+                      "Чтобы взять алмазик, просто подойдите к нему"]
+        depos_text = ["А это руда. Но ее не так просто собрать",
+                      "Чтобы собрать руду, подойдите к ней и зажмите 'E' на английской раскладке",
+                      "За руду вы можете не получить ничего или в диапозоне от 5 до 25 монеток"]
+        box_text = ["Это коробка. С ней все то же самое что и с рудой"]
+        texts = [opis_text, diamon_text, depos_text, box_text]
+        self.text_coord = 50
+        for i in texts:
+            for line in i:
+                string_rendered = self.font2.render(line, True, pygame.Color('black'))
+                intro_rect = string_rendered.get_rect()
+                if i == opis_text:
+                    intro_rect.x = 10
+                else:
+                    intro_rect.x = 150
+                self.text_coord += 10
+                intro_rect.top = self.text_coord
+                self.text_coord += intro_rect.height
+                screen.blit(string_rendered, intro_rect)
+                pygame.display.update()
+            self.text_coord += 30
+        self.running()
 
-    text_coord = 190
-    for line in opis_text:
-        string_rendered = font2.render(line, True, pygame.Color('black'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 110
-        intro_rect.top = text_coord
-        intro_rect.x = 150
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
-        pygame.display.update()
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
-                    instruction2()
-                    running = False
-
-
-def instruction2():
-    image_strel = pygame.transform.scale(load_image("strelochka.png", (0, 0, 0), f='images'), (70, 70))
-    display.fill((255, 248, 231))
-    screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
-    font = pygame.font.Font('data/fonts/font.otf', 70)
-    text = font.render("Instruction", True, (171, 195, 87))
-    screen.blit(text, (320, 4))
-    screen.blit(image_strel, (900, 550))
-    pygame.display.update()
-    opis_text = ["Цель этой игры - заработать как можно больше монеток, чтобы развиваться дальше",
-                 "Сейчас вы спросите как же это сделать :з",
-                 "Давайте посмотрим"]
-    font2 = pygame.font.Font('data/fonts/dop_font.otf', 25)
-    text_coord = 50
-    for line in opis_text:
-        string_rendered = font2.render(line, True, pygame.Color('black'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
-        pygame.display.update()
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
-                    running = False
+    def instruction3(self):
+        pass
 
 
 def read_base():
@@ -545,7 +563,8 @@ display = pygame.Surface((300, 300))
 level, money = read_base()
 startwin = StartWindow()
 startwin.draw()
-instruction1()
+instruction = Instruction()
+instruction.instruction1()
 ostrov = Ostrov()
 dow = Dowload()
 dow.draw()
