@@ -84,6 +84,10 @@ class StartWindow:
                     elif (pos[0] > 215 and pos[0] < 720) and (pos[1] > 220 and pos[1] < 420):
                         self.button_sound.play()
                         running = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        self.button_sound.play()
+                        running = False
 
 
 class Player(pygame.sprite.Sprite):
