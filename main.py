@@ -6,7 +6,7 @@ import pytmx
 import random
 import sqlite3
 
-FPS = 130
+FPS = 150
 pygame.init()
 all_sprites = pygame.sprite.Group()
 obstacles_group = pygame.sprite.Group()
@@ -236,10 +236,10 @@ class Cat(pygame.sprite.Sprite):
         self.font = pygame.font.Font('data/fonts/Impact.ttf', 15)
         self.big_font = pygame.font.Font('data/fonts/Impact.ttf', 30)
         self.normal_font = pygame.font.Font('data/fonts/Impact.ttf', 18)
-        self.text = self.big_font.render('Привет!', True, (255, 255, 255))
+        self.text = self.normal_font.render('Здравствуйте! Как ваше ничего?', True, (255, 255, 255))
         self.text2 = self.big_font.render('Награда', True, (230, 237, 25))
         self.text1 = self.normal_font.render('У меня есть отличное задание для тебя!', True, (255, 255, 255))
-        self.text3 = self.big_font.render('Ну, что согласен?', True, (255, 255, 255))
+        self.text3 = self.normal_font.render('Ну, что, абрикосина? Согласен?', True, (255, 255, 255))
         self.but = pygame.transform.scale(load_image('ex_button.png', (0, 0, 0), f='images'), (350, 140))
         self.but_complete = pygame.transform.scale(load_image('compl_button.png', (0, 0, 0), f='images'), (350, 140))
         self.update_house = len(
@@ -247,10 +247,10 @@ class Cat(pygame.sprite.Sprite):
         self.count = 0
         self.type_obj = False
         self.obj = False
-        self.text7 = self.normal_font.render('У меня нет для тебя новых заданий!', True, (255, 255, 255))
+        self.text7 = self.normal_font.render('Злые вы! Нет новых заданий!', True, (255, 255, 255))
         self.text8 = self.normal_font.render('Переходи на следующий уровень и приходи за', True, (255, 255, 255))
         self.text9 = self.normal_font.render('новыми заданиями!', True, (255, 255, 255))
-        self.text4 = self.normal_font.render('Выполни свое задания и приходи за наградой!', True, (255, 255, 255))
+        self.text4 = self.normal_font.render('Гав! Где выполненные задания??', True, (255, 255, 255))
         self.text5 = self.normal_font.render('Ого! Вижу ты выполнил задание!', True, (255, 255, 255))
         self.text6 = self.normal_font.render('Сдавай его и получай награду!', True, (255, 255, 255))
         self.mini_cat = pygame.transform.scale(load_image('dop_cat1.png', (255, 255, 255), f='images'),
@@ -268,19 +268,19 @@ class Cat(pygame.sprite.Sprite):
             if pygame.sprite.spritecollideany(self, player_group):
                 try:
                     screen.blit(self.menu, (self.rect.x + 50, self.rect.y - 100))
-                    screen.blit(self.text, (self.rect.x + 190, self.rect.y - 75))
+                    screen.blit(self.text, (self.rect.x + 90, self.rect.y - 75))
                     screen.blit(self.text1, (self.rect.x + 85, self.rect.y - 45))
                     self.texts, self.mon, self.obj, self.count, self.id = \
                         cur.execute(f"SELECT text, awarding, typeobject,"
                                     f" count, id from quests"
                                     f" WHERE level = {level} AND"
                                     f" done = 0").fetchall()[0]
-                    screen.blit(self.normal_font.render(self.texts, True, (125, 39, 211)),
+                    screen.blit(self.normal_font.render(self.texts, True, (255, 255, 255)),
                                 (self.rect.x + 85, self.rect.y - 10))
                     screen.blit(self.text2, (self.rect.x + 85, self.rect.y + 15))
                     screen.blit(self.big_font.render(str(self.mon), True,
                                                      (230, 237, 25)), (self.rect.x + 200, self.rect.y + 15))
-                    screen.blit(self.text3, (self.rect.x + 135, self.rect.y + 55))
+                    screen.blit(self.text3, (self.rect.x + 90, self.rect.y + 55))
                     screen.blit(self.but, (self.rect.x + 80, self.rect.y + 110))
                     screen.blit(self.mini_cat, (self.rect.x + 360, self.rect.y + 230))
                     button_cor = list(
@@ -300,7 +300,7 @@ class Cat(pygame.sprite.Sprite):
                 except IndexError:
                     if pygame.sprite.spritecollideany(self, player_group):
                         screen.blit(self.menu, (self.rect.x + 50, self.rect.y - 100))
-                        screen.blit(self.text, (self.rect.x + 190, self.rect.y - 75))
+                        screen.blit(self.text, (self.rect.x + 80, self.rect.y - 75))
                         screen.blit(self.text7, (self.rect.x + 95, self.rect.y - 45))
                         screen.blit(self.text8, (self.rect.x + 65, self.rect.y - 20))
                         screen.blit(self.text9, (self.rect.x + 135, self.rect.y - 5))
@@ -319,20 +319,20 @@ class Cat(pygame.sprite.Sprite):
                 self.type_obj = self.ore
             screen.blit(self.mini_menu, (0, 50))
             screen.blit(self.text9, (9, 58))
-            screen.blit(self.mini_font.render(self.texts, True, (0, 61, 235)),
+            screen.blit(self.mini_font.render(self.texts, True, (255, 255, 255)),
                         (9, 80))
             screen.blit(self.text2, (9, 135))
             screen.blit(self.font.render(str(self.mon), True, (230, 237, 25)), (15, 170))
             if self.type_obj < self.count:
                 screen.blit(self.text10, (9, 95))
-                screen.blit(self.font.render(str(self.type_obj), True, (191, 238, 250)), (9, 115))
+                screen.blit(self.font.render(str(self.type_obj), True, (255, 255, 255)), (9, 115))
                 if pygame.sprite.spritecollideany(self, player_group):
                     screen.blit(self.menu, (self.rect.x + 50, self.rect.y - 100))
                     screen.blit(pygame.transform.scale(self.image, (180, 180 * 1.157)),
                                 (self.rect.x + 150, self.rect.y + 70))
-                    screen.blit(self.text, (self.rect.x + 190, self.rect.y - 75))
-                    screen.blit(self.text4, (self.rect.x + 65, self.rect.y - 45))
-                    screen.blit(self.normal_font.render(str(self.texts), True, (125, 39, 211)),
+                    screen.blit(self.text, (self.rect.x + 90, self.rect.y - 75))
+                    screen.blit(self.text4, (self.rect.x + 90, self.rect.y - 45))
+                    screen.blit(self.normal_font.render(str(self.texts), True, (255, 255, 255)),
                                 (self.rect.x + 85, self.rect.y - 10))
                     screen.blit(self.text2, (self.rect.x + 85, self.rect.y + 15))
                     screen.blit(self.big_font.render(str(self.mon), True, (230, 237, 25)),
@@ -714,6 +714,7 @@ class Instruction:
     def __init__(self):
         self.click_sound = pygame.mixer.Sound('data/musics/button_sound.mp3')
         self.image_strel = pygame.transform.scale(load_image("strelochka.png", (0, 0, 0), f='images'), (70, 70))
+        self.image_strel2 = pygame.transform.rotate(self.image_strel, 180)
         self.font = pygame.font.Font('data/fonts/font.otf', 70)
         self.text = self.font.render("Instruction", True, (171, 195, 87))
         self.font2 = pygame.font.Font('data/fonts/dop_font.otf', 25)
@@ -735,6 +736,19 @@ class Instruction:
                             running = False
                         elif self.count == 2:
                             self.click_sound.play()
+                            self.instruction3()
+                            running = False
+                        elif self.count == 3:
+                            self.click_sound.play()
+                            running = False
+                    elif event.key == pygame.K_LEFT:
+                        if self.count == 2:
+                            self.click_sound.play()
+                            self.instruction1()
+                            running = False
+                        elif self.count == 3:
+                            self.click_sound.play()
+                            self.instruction2()
                             running = False
 
     def instruction1(self):
@@ -757,6 +771,7 @@ class Instruction:
         screen.blit(image_cat, (15, 350))
         screen.blit(self.image_strel, (900, 550))
         texts = [intro_text, opis_text]
+        self.text_coord = 50
         for i in texts:
             for line in i:
                 string_rendered = self.font2.render(line, True, pygame.Color('black'))
@@ -783,6 +798,7 @@ class Instruction:
         screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
         screen.blit(self.text, (320, 4))
         screen.blit(self.image_strel, (900, 550))
+        screen.blit(self.image_strel2, (20, 550))
         screen.blit(image_diam, (15, 190))
         screen.blit(image_depos, (15, 320))
         screen.blit(image_box, (15, 450))
@@ -815,7 +831,37 @@ class Instruction:
         self.running()
 
     def instruction3(self):
-        pass
+        self.count = 3
+        display.fill((255, 248, 231))
+        screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
+        screen.blit(self.text, (320, 4))
+        screen.blit(self.image_strel, (900, 550))
+        screen.blit(self.image_strel2, (20, 550))
+        pygame.display.update()
+        opis_text = ["Так же на карте вы встретите дома, которые можно купить и получать одну монетку в секунду",
+                     "Купленные дома можно улучшать и тогда они будут приносить на одну монетку больше"]
+        upr_text = ["Как же происходит управление?",
+                    "Управление происходит с помощьюю клавиш WASD",
+                    "W - вверх",
+                    "S - вниз",
+                    "A - влево",
+                    "D - вправо"]
+        author_text = ["Над игрой работали Дувакин Андрей и Толменева Дарья",
+                       "Удачной игры :з"]
+        texts = [opis_text, upr_text, author_text]
+        self.text_coord = 50
+        for i in texts:
+            for line in i:
+                string_rendered = self.font2.render(line, True, pygame.Color('black'))
+                intro_rect = string_rendered.get_rect()
+                intro_rect.x = 10
+                self.text_coord += 10
+                intro_rect.top = self.text_coord
+                self.text_coord += intro_rect.height
+                screen.blit(string_rendered, intro_rect)
+                pygame.display.update()
+            self.text_coord += 30
+        self.running()
 
 
 def read_base():
