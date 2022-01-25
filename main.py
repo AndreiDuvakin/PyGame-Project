@@ -15,6 +15,7 @@ player_group = pygame.sprite.Group()
 big_obstacles_group = pygame.sprite.Group()
 diamond_group = pygame.sprite.Group()
 house_group = pygame.sprite.Group()
+ore_group = pygame.sprite.Group()
 cat_group = pygame.sprite.Group()
 titles = [[9, 10, 31, 33], [7, 11, 32], [20, 24, 25, 27, 28, 29, 36, 34], [6, 20], [15, 16, 17, 18]]
 size_sprite = {6: (90, 90), 15: (200, 200), 16: (200, 200), 17: (200, 200), 18: (200, 200), 20: (60, 60),
@@ -252,8 +253,8 @@ class Cat(pygame.sprite.Sprite):
         self.type_obj = False
         self.obj = False
         self.text7 = self.normal_font.render('Злые вы! Нет новых заданий!', True, (255, 255, 255))
-        self.text8 = self.normal_font.render('Переходи на следующий уровень и приходи за', True, (255, 255, 255))
-        self.text9 = self.normal_font.render('новыми заданиями!', True, (255, 255, 255))
+        self.text8 = self.normal_font.render('Переходи на следующий уровень', True, (255, 255, 255))
+        self.text91 = self.normal_font.render('и приходи за новыми заданиями!', True, (255, 255, 255))
         self.text4 = self.normal_font.render('Гав! Где выполненные задания??', True, (255, 255, 255))
         self.text5 = self.normal_font.render('Ого! Вижу ты выполнил задание!', True, (255, 255, 255))
         self.text6 = self.normal_font.render('Сдавай его и получай награду!', True, (255, 255, 255))
@@ -272,7 +273,7 @@ class Cat(pygame.sprite.Sprite):
             if pygame.sprite.spritecollideany(self, player_group):
                 try:
                     screen.blit(self.menu, (self.rect.x + 50, self.rect.y - 100))
-                    screen.blit(self.text, (self.rect.x + 90, self.rect.y - 75))
+                    screen.blit(self.text, (self.rect.x + 85, self.rect.y - 75))
                     screen.blit(self.text1, (self.rect.x + 85, self.rect.y - 45))
                     self.texts, self.mon, self.obj, self.count, self.id = \
                         cur.execute(f"SELECT text, awarding, typeobject,"
@@ -304,10 +305,10 @@ class Cat(pygame.sprite.Sprite):
                 except IndexError:
                     if pygame.sprite.spritecollideany(self, player_group):
                         screen.blit(self.menu, (self.rect.x + 50, self.rect.y - 100))
-                        screen.blit(self.text, (self.rect.x + 80, self.rect.y - 75))
+                        screen.blit(self.text, (self.rect.x + 85, self.rect.y - 75))
                         screen.blit(self.text7, (self.rect.x + 95, self.rect.y - 45))
-                        screen.blit(self.text8, (self.rect.x + 65, self.rect.y - 20))
-                        screen.blit(self.text9, (self.rect.x + 135, self.rect.y - 5))
+                        screen.blit(self.text8, (self.rect.x + 95, self.rect.y - 20))
+                        screen.blit(self.text91, (self.rect.x + 95, self.rect.y - 5))
                         screen.blit(pygame.transform.scale(self.image, (180, 180 * 1.157)),
                                     (self.rect.x + 150, self.rect.y + 70))
         else:
@@ -334,7 +335,7 @@ class Cat(pygame.sprite.Sprite):
                     screen.blit(self.menu, (self.rect.x + 50, self.rect.y - 100))
                     screen.blit(pygame.transform.scale(self.image, (180, 180 * 1.157)),
                                 (self.rect.x + 150, self.rect.y + 70))
-                    screen.blit(self.text, (self.rect.x + 90, self.rect.y - 75))
+                    screen.blit(self.text, (self.rect.x + 85, self.rect.y - 75))
                     screen.blit(self.text4, (self.rect.x + 90, self.rect.y - 45))
                     screen.blit(self.normal_font.render(str(self.texts), True, (255, 255, 255)),
                                 (self.rect.x + 85, self.rect.y - 10))
@@ -347,7 +348,7 @@ class Cat(pygame.sprite.Sprite):
                 screen.blit(self.text12, (9, 125))
                 if pygame.sprite.spritecollideany(self, player_group):
                     screen.blit(self.menu, (self.rect.x + 50, self.rect.y - 100))
-                    screen.blit(self.text, (self.rect.x + 190, self.rect.y - 75))
+                    screen.blit(self.text, (self.rect.x + 85, self.rect.y - 75))
                     screen.blit(self.text5, (self.rect.x + 85, self.rect.y - 45))
                     screen.blit(self.text6, (self.rect.x + 85, self.rect.y))
                     screen.blit(self.text2, (self.rect.x + 85, self.rect.y + 35))
@@ -389,6 +390,7 @@ class PolylineObj(pygame.sprite.Sprite):
             self.box_sound = pygame.mixer.Sound('data/musics/krack_box.mp3')
         else:
             self.rude_sound = pygame.mixer.Sound('data/musics/kirka_lomik.mp3')
+            ore_group.add(self)
         self.life = 1000
         self.name = name
         self.x = pos_x
@@ -498,7 +500,7 @@ class House(pygame.sprite.Sprite):
         self.text10 = self.normal_font.render(
             f"Улучшен!",
             True, (170, 238, 255))
-        self.board = load_image('fon_board_house.png', (0, 0, 0), f='images')
+        self.board = pygame.transform.scale(load_image('fon_board_house.png', (0, 0, 0), f='images'), (210, 180))
         self.money = pygame.transform.scale(load_image('money_img.jpg', (255, 255, 255), f='images'), (30, 30))
         self.but = pygame.transform.scale(load_image('buy_button.png', (0, 0, 0), f='images'), (185, 75))
         self.up_but = pygame.transform.scale(load_image('update_button.png', (0, 0, 0), f='images'), (185, 75))
@@ -509,24 +511,24 @@ class House(pygame.sprite.Sprite):
         if self.sold:
             money += self.income / 60
         if pygame.sprite.spritecollideany(self, player_group):
-            screen.blit(self.board, (self.rect.x - 170, self.rect.y + 40))
+            screen.blit(self.board, (self.rect.x - 190, self.rect.y + 40))
             if self.sold:
-                screen.blit(self.text4, (self.rect.x - 160, self.rect.y + 60))
+                screen.blit(self.text4, (self.rect.x - 175, self.rect.y + 60))
                 screen.blit(self.font.render(
                     f"Ваш доход: {self.income}",
-                    True, (255, 255, 255)), (self.rect.x - 160, self.rect.y + 75))
+                    True, (255, 255, 255)), (self.rect.x - 175, self.rect.y + 75))
                 if self.income < 10:
                     self.price_upgrate = (house_buy + self.income) * 1000 * 1.5
                     screen.blit(self.up_but,
-                                (self.rect.x - 170, self.rect.y + 115))
+                                (self.rect.x - 180, self.rect.y + 115))
                     if money - self.price_upgrate >= 0:
-                        screen.blit(self.text6, (self.rect.x - 160, self.rect.y + 90))
+                        screen.blit(self.text6, (self.rect.x - 175, self.rect.y + 90))
                         screen.blit(self.big_font.render(
                             f"{str(int(self.price_upgrate))}",
-                            True, (255, 255, 255)), (self.rect.x - 120, self.rect.y + 175))
+                            True, (255, 255, 255)), (self.rect.x - 135, self.rect.y + 175))
                         screen.blit(
                             self.money,
-                            (self.rect.x - 160, self.rect.y + 180))
+                            (self.rect.x - 175, self.rect.y + 180))
                         button_cor = list(
                             set(list(
                                 map(lambda x: x.pos if x.type == pygame.MOUSEBUTTONDOWN else False,
@@ -534,7 +536,7 @@ class House(pygame.sprite.Sprite):
                         if button_cor != []:
                             if button_cor[0] != False:
                                 x, y = button_cor[0]
-                                if self.rect.x - 170 < x < self.rect.x + 15 \
+                                if self.rect.x - 185 < x < self.rect.x \
                                         and self.rect.y + 115 < y < self.rect.y + 190:
                                     self.income += 1
                                     cur.execute(
@@ -543,43 +545,43 @@ class House(pygame.sprite.Sprite):
                                     con.commit()
                                     money -= self.price_upgrate
                     else:
-                        screen.blit(self.text7, (self.rect.x - 160, self.rect.y + 90))
-                        screen.blit(self.text8, (self.rect.x - 160, self.rect.y + 105))
+                        screen.blit(self.text7, (self.rect.x - 175, self.rect.y + 90))
+                        screen.blit(self.text8, (self.rect.x - 175, self.rect.y + 105))
                         screen.blit(self.big_font.render(
                             f"{str(int(self.price_upgrate))}",
-                            True, (255, 0, 0)), (self.rect.x - 120, self.rect.y + 175))
+                            True, (255, 0, 0)), (self.rect.x - 135, self.rect.y + 175))
                         screen.blit(
                             self.money,
-                            (self.rect.x - 160, self.rect.y + 180))
+                            (self.rect.x - 175, self.rect.y + 180))
                 else:
-                    screen.blit(self.text7, (self.rect.x - 160, self.rect.y + 90))
-                    screen.blit(self.text9, (self.rect.x - 140, self.rect.y + 115))
-                    screen.blit(self.text10, (self.rect.x - 125, self.rect.y + 140))
+                    screen.blit(self.text7, (self.rect.x - 175, self.rect.y + 90))
+                    screen.blit(self.text9, (self.rect.x - 155, self.rect.y + 115))
+                    screen.blit(self.text10, (self.rect.x - 140, self.rect.y + 140))
                     screen.blit(
                         self.money,
-                        (self.rect.x - 100, self.rect.y + 180))
+                        (self.rect.x - 115, self.rect.y + 180))
             else:
                 self.price = int((house_buy + 1) * 1000 * 1.5)
-                screen.blit(self.text, (self.rect.x - 160, self.rect.y + 60))
-                screen.blit(self.text1, (self.rect.x - 120, self.rect.y + 75))
-                screen.blit(self.text2, (self.rect.x - 135, self.rect.y + 90))
-                screen.blit(self.text3, (self.rect.x - 145, self.rect.y + 105))
+                screen.blit(self.text, (self.rect.x - 175, self.rect.y + 60))
+                screen.blit(self.text1, (self.rect.x - 135, self.rect.y + 75))
+                screen.blit(self.text2, (self.rect.x - 150, self.rect.y + 90))
+                screen.blit(self.text3, (self.rect.x - 160, self.rect.y + 105))
                 if money - self.price >= 0:
                     screen.blit(self.big_font.render(
                         f"{str(self.price)}",
-                        True, (234, 239, 91)), (self.rect.x - 120, self.rect.y + 175))
+                        True, (234, 239, 91)), (self.rect.x - 135, self.rect.y + 175))
                     screen.blit(
                         self.money,
-                        (self.rect.x - 160, self.rect.y + 180))
+                        (self.rect.x - 175, self.rect.y + 180))
                     screen.blit(self.but,
-                                (self.rect.x - 170, self.rect.y + 115))
+                                (self.rect.x - 180, self.rect.y + 115))
                     button_cor = list(
                         set(list(
                             map(lambda x: x.pos if x.type == pygame.MOUSEBUTTONDOWN else False, pygame.event.get()))))
                     if button_cor != []:
                         if button_cor[0] != False:
                             x, y = button_cor[0]
-                            if self.rect.x - 170 < x < self.rect.x + 15 and self.rect.y + 115 < y < self.rect.y + 190:
+                            if self.rect.x - 185 < x < self.rect.x and self.rect.y + 115 < y < self.rect.y + 190:
                                 self.sold = True
                                 self.income = 1
                                 cur.execute(
@@ -590,14 +592,14 @@ class House(pygame.sprite.Sprite):
                                 house_buy += 1
 
                 screen.blit(pygame.transform.scale(load_image('buy_button.png', (0, 0, 0), f='images'), (185, 75)),
-                            (self.rect.x - 170, self.rect.y + 115))
+                            (self.rect.x - 185, self.rect.y + 115))
                 if money - self.price < 0:
                     screen.blit(self.normal_font.render(
                         f"Недостаточно монет!",
-                        True, (255, 0, 0)), (self.rect.x - 160, self.rect.y + 175))
+                        True, (255, 0, 0)), (self.rect.x - 175, self.rect.y + 175))
                     screen.blit(self.font.render(
                         f"Необходимо {str(self.price)} монет",
-                        True, (234, 239, 91)), (self.rect.x - 160, self.rect.y + 195))
+                        True, (234, 239, 91)), (self.rect.x - 175, self.rect.y + 195))
 
 
 class Ostrov:
@@ -658,12 +660,25 @@ class Ostrov:
             p = PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, 'ore_deposits')
             if not pygame.sprite.spritecollideany(p, tiles_group):
                 p.kill()
+            else:
+                ore_group.add(p)
         screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+
+    def more_ore(self):
+        ore = random.randint(6, 20)
+        for i in range(ore):
+            x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
+            while (x, y) in self.obstacles:
+                x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
+            p = PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, 'ore_deposits')
+            if not pygame.sprite.spritecollideany(p, tiles_group):
+                p.kill()
+                ore += 1
 
     def more_dimond(self):
         diaminds = random.randint(6, 50)
@@ -732,7 +747,31 @@ class Instruction:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.KEYDOWN:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    x, y = event.pos
+                    if self.count == 1:
+                        if 900 < x < 970 and 550 < y < 620:
+                            self.click_sound.play()
+                            self.instruction2()
+                            running = False
+                    elif self.count == 2:
+                        if 900 < x < 970 and 550 < y < 620:
+                            self.click_sound.play()
+                            self.instruction3()
+                            running = False
+                        if 20 < x < 90 and 550 < y < 620:
+                            self.click_sound.play()
+                            self.instruction1()
+                            running = False
+                    elif self.count == 3:
+                        if 900 < x < 970 and 550 < y < 620:
+                            self.click_sound.play()
+                            running = False
+                        if 20 < x < 90 and 550 < y < 620:
+                            self.click_sound.play()
+                            self.instruction2()
+                            running = False
+                if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RIGHT:
                         if self.count == 1:
                             self.click_sound.play()
@@ -893,19 +932,19 @@ def insert_base(level, money):
 def start_game(play_sound):
     if play_sound:
         play_sound = True
-        img = load_image("sound.png", convert=False, f='images')
     else:
         play_sound = False
-        img = load_image("no_sound.png", convert=False, f='images')
     player = Player(350, 1600)
     money_img = load_image("money_img.jpg", (255, 255, 255), f='images')
     money_img = pygame.transform.scale(money_img, (30, 30))
     money_fon = pygame.transform.scale(load_image("new_money_fon.png", (0, 0, 0), f='images'), (350, 50))
-    img = pygame.transform.scale(img, (40, 40))
     running = True
     clock = pygame.time.Clock()
     camera = Camera()
     fon = pygame.image.load("data/images/fon_or.png")
+    stop_but = pygame.transform.scale(load_image("no_sound.png", convert=False, f='images'), (40, 40))
+    font = pygame.font.Font('data/fonts/font.otf', 50)
+    play_but = pygame.transform.scale(load_image("sound.png", convert=False, f='images'), (40, 40))
     while running:
         screen.fill((0, 0, 0))
         for event in pygame.event.get():
@@ -915,18 +954,16 @@ def start_game(play_sound):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = event.pos
                 if (pos[0] > 880 and pos[0] < 980) and (pos[1] > 20 and pos[1] < 80) and play_sound:
-                    img = load_image("no_sound.png", convert=False, f='images')
                     play_sound = False
-                    img = pygame.transform.scale(img, (40, 40))
                     sound.stop()
                 elif (pos[0] > 880 and pos[0] < 980) and (pos[1] > 20 and pos[1] < 80) and not play_sound:
-                    img = load_image("sound.png", convert=False, f='images')
                     play_sound = True
-                    img = pygame.transform.scale(img, (40, 40))
                     sound.play()
         camera.update(player)
         for sprite in all_sprites:
             camera.apply(sprite)
+        if len(ore_group) <= 5:
+            ostrov.more_ore()
         if len(diamond_group) <= 5:
             ostrov.more_dimond()
         screen.blit(fon, (0, 0))
@@ -935,12 +972,14 @@ def start_game(play_sound):
         big_obstacles_group.draw(screen)
         cat_group.update()
         player_group.update()
-        screen.blit(img, (900, 20))
         screen.blit(money_fon, (0, 0))
-        font = pygame.font.Font('data/fonts/font.otf', 50)
         text = font.render(f"{str(int(money))}", True, (255, 255, 255))
         screen.blit(text, (66, 4))
         screen.blit(money_img, (30, 10))
+        if play_sound:
+            screen.blit(play_but, (900, 20))
+        else:
+            screen.blit(stop_but, (900, 20))
         pygame.display.flip()
         clock.tick(FPS)
 
