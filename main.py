@@ -17,8 +17,9 @@ diamond_group = pygame.sprite.Group()
 house_group = pygame.sprite.Group()
 ore_group = pygame.sprite.Group()
 cat_group = pygame.sprite.Group()
-titles = [[9, 10, 31, 33], [7, 11, 32], [20, 24, 25, 27, 28, 29, 36, 34], [6, 20], [15, 16, 17, 18]]
-size_sprite = {6: (90, 90), 15: (200, 200), 16: (200, 200), 17: (200, 200), 18: (200, 200), 20: (60, 60),
+titles = [[9, 10, 31, 33], [7, 11, 32], [38, 36, 37, 35, 20, 24, 25, 27, 28, 29, 36, 34], [6, 20], [15, 16, 17, 18]]
+size_sprite = {38: (70, 160), 37: (270, 250), 36: (250, 250), 35: (200, 200), 6: (90, 90), 15: (200, 200),
+               16: (200, 200), 17: (200, 200), 18: (200, 200), 20: (60, 60),
                24: (70, 160), 25: (70, 160), 27: (60, 60), 28: (60, 60), 29: (300, 300), 34: (90, 90)}
 sprite_name = {6: 'box'}
 house_count = 0
@@ -218,7 +219,11 @@ class Dowload:
 class Diamond(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(all_sprites, diamond_group)
-        self.image = pygame.transform.scale(load_image('dimond.png', (255, 255, 255)), (35, 45))
+        if level == 1:
+            i = 'dimond.png'
+        elif level == 2:
+            i = 'dimond2.png'
+        self.image = pygame.transform.scale(load_image(i, (255, 255, 255)), (35, 45))
         self.rect = self.image.get_rect().move(pos_x, pos_y)
         self.rect.center = (pos_x, pos_y)
         # self.image = pygame.transform.scale(self.image, (50, 50))
@@ -232,6 +237,7 @@ class Cat(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(pos_x, pos_y)
         self.menu = pygame.transform.scale(load_image('fon_board_house.png', (0, 0, 0), f='images'), (400, 400))
         self.active_task = False
+        self.button_sound = pygame.mixer.Sound('data/musics/button_sound.mp3')
         self.diamond = 0
         self.ore = 0
         self.box = 0
@@ -297,10 +303,10 @@ class Cat(pygame.sprite.Sprite):
                             x, y = button_cor[0]
                             if self.rect.x + 80 < x < self.rect.x + 430 and self.rect.y + 110 < y < self.rect.y + 250:
                                 self.active_task = True
+                                self.button_sound.play()
                                 self.type_obj = False
                                 self.diamond = 0
                                 self.ore = 0
-                                self.box = 0
                                 self.step_foot = 0
                 except IndexError:
                     if pygame.sprite.spritecollideany(self, player_group):
@@ -366,6 +372,7 @@ class Cat(pygame.sprite.Sprite):
                             if self.rect.x + 80 < x < self.rect.x + 430 and self.rect.y + 110 < y < self.rect.y + 250:
                                 self.active_task = False
                                 self.count = 0
+                                self.button_sound.play()
                                 self.type_obj = 0
                                 self.obj = False
                                 self.diamond = 0
@@ -453,6 +460,7 @@ class House(pygame.sprite.Sprite):
         global house_count
         super().__init__(all_sprites, house_group, big_obstacles_group)
         sixe = size_sprite[num]
+        self.button_sound = pygame.mixer.Sound('data/musics/button_sound.mp3')
         self.image = pygame.transform.scale(imge, sixe)
         self.rect = self.image.get_rect().move(pos_x, pos_y)
         self.mask = pygame.mask.from_surface(self.image)
@@ -539,6 +547,8 @@ class House(pygame.sprite.Sprite):
                                 if self.rect.x - 185 < x < self.rect.x \
                                         and self.rect.y + 115 < y < self.rect.y + 190:
                                     self.income += 1
+                                    self.button_sound.play()
+                                    cat.update_house += 1
                                     cur.execute(
                                         f"""UPDATE house SET income = {str(self.income)}
                                          WHERE level = {level} AND number = {self.number} """)
@@ -584,15 +594,14 @@ class House(pygame.sprite.Sprite):
                             if self.rect.x - 185 < x < self.rect.x and self.rect.y + 115 < y < self.rect.y + 190:
                                 self.sold = True
                                 self.income = 1
+                                self.button_sound.play()
                                 cur.execute(
                                     f"""INSERT INTO house(level, number, income)
                                  VALUES({str(level)}, {str(self.number)}, {str(self.income)})""")
                                 con.commit()
                                 money -= self.price
                                 house_buy += 1
-
-                screen.blit(pygame.transform.scale(load_image('buy_button.png', (0, 0, 0), f='images'), (185, 75)),
-                            (self.rect.x - 185, self.rect.y + 115))
+                                cat.buy_house += 1
                 if money - self.price < 0:
                     screen.blit(self.normal_font.render(
                         f"Недостаточно монет!",
@@ -657,7 +666,11 @@ class Ostrov:
             x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
             while (x, y) in self.obstacles:
                 x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
-            p = PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, 'ore_deposits')
+            if level == 1:
+                i = 'ore_deposits2'
+            elif level == 2:
+                i = 'ore_deposits3'
+            p = PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, i)
             if not pygame.sprite.spritecollideany(p, tiles_group):
                 p.kill()
             else:
@@ -675,7 +688,7 @@ class Ostrov:
             x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
             while (x, y) in self.obstacles:
                 x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
-            p = PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, 'ore_deposits')
+            p = PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, 'ore_deposits2')
             if not pygame.sprite.spritecollideany(p, tiles_group):
                 p.kill()
                 ore += 1
@@ -834,7 +847,7 @@ class Instruction:
 
     def instruction2(self):
         image_diam = pygame.transform.scale(load_image("dop_diamond.png", (255, 255, 255), f='images'), (90, 100))
-        image_depos = pygame.transform.scale(load_image("dop_deposits.png", (255, 255, 255), f='images'), (90, 100))
+        image_depos = pygame.transform.scale(load_image("dop_deposits2.png", (255, 255, 255), f='images'), (90, 110))
         image_box = pygame.transform.scale(load_image("dop_box.png", (255, 255, 255), f='images'), (90, 100))
         self.count = 2
         display.fill((255, 248, 231))
@@ -843,7 +856,7 @@ class Instruction:
         screen.blit(self.image_strel, (900, 550))
         screen.blit(self.image_strel2, (20, 550))
         screen.blit(image_diam, (15, 190))
-        screen.blit(image_depos, (15, 320))
+        screen.blit(image_depos, (15, 310))
         screen.blit(image_box, (15, 450))
         pygame.display.update()
         opis_text = ["Цель этой игры - заработать как можно больше монеток, чтобы развиваться дальше",
@@ -851,7 +864,7 @@ class Instruction:
                      "Давайте посмотрим"]
         diamon_text = ["Это алмазик, собирая его вы будете получать 10 монеток за каждый",
                        "Чтобы взять алмазик, просто подойдите к нему"]
-        depos_text = ["А это руда. Но ее не так просто собрать",
+        depos_text = ["А это один из видов руды. Но ее не так просто собрать",
                       "Чтобы собрать руду, подойдите к ней и зажмите 'E' на английской раскладке",
                       "За руду вы можете не получить ничего или в диапозоне от 5 до 25 монеток"]
         box_text = ["Это коробка. С ней все то же самое что и с рудой"]
@@ -929,6 +942,17 @@ def insert_base(level, money):
     con.close()
 
 
+def update_level(board, text, text2):
+    if cat.active_task:
+        screen.blit(board, (0, 200))
+        screen.blit(text, (10, 210))
+        screen.blit(text2, (10, 225))
+    else:
+        screen.blit(board, (0, 50))
+        screen.blit(text, (20, 65))
+        screen.blit(text2, (20, 80))
+
+
 def start_game(play_sound):
     if play_sound:
         play_sound = True
@@ -941,9 +965,13 @@ def start_game(play_sound):
     running = True
     clock = pygame.time.Clock()
     camera = Camera()
+    board = pygame.transform.scale(load_image('fon_board_house.png', (0, 0, 0), f='images'), (250, 250))
     fon = pygame.image.load("data/images/fon_or.png")
     stop_but = pygame.transform.scale(load_image("no_sound.png", convert=False, f='images'), (40, 40))
     font = pygame.font.Font('data/fonts/font.otf', 50)
+    font_medium = pygame.font.Font('data/fonts/Impact.ttf', 15)
+    text1 = font_medium.render('Ты можешь перейти ', True, (255, 255, 255))
+    text2 = font_medium.render('на следующий уровень!', True, (255, 255, 255))
     play_but = pygame.transform.scale(load_image("sound.png", convert=False, f='images'), (40, 40))
     while running:
         screen.fill((0, 0, 0))
@@ -973,6 +1001,8 @@ def start_game(play_sound):
         cat_group.update()
         player_group.update()
         screen.blit(money_fon, (0, 0))
+        if True:
+            update_level(board, text1, text2)
         text = font.render(f"{str(int(money))}", True, (255, 255, 255))
         screen.blit(text, (66, 4))
         screen.blit(money_img, (30, 10))
@@ -1004,4 +1034,7 @@ dow = Dowload()
 dow.draw()
 ostrov.draw()
 cat = Cat(2530, 1380)
-start_game(play_sound)
+if level == 1:
+    start_game(play_sound)
+if level == 2:
+    pass
