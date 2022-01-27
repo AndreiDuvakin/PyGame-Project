@@ -97,7 +97,10 @@ class StartWindow:
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
-        self.image = load_image('an_dino_1.png', (255, 255, 255), f='images')
+        if level == 1:
+            self.image = load_image('ZgizsloiDtI.jpg.png', (255, 255, 255), f='images')
+        elif level == 2:
+            self.image = load_image('an_dino_1.png', (255, 255, 255), f='images')
         self.image = pygame.transform.scale(self.image, (70, int(70 * 0.8211)))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
@@ -948,7 +951,7 @@ def read_base():
 def insert_base(level, money):
     con = sqlite3.connect("data/base/data.sqlite")
     cur = con.cursor()
-    cur.execute("""INSERT INTO main(level, money, progress, datatime, sessiontime, actions) VALUES(?, ?, 0, 0, 0, 0)""",
+    cur.execute("""INSERT INTO main(level, money, sessiontime) VALUES(?, ?, 0)""",
                 (item_id := int(level), int(money),))
     con.commit()
     con.close()
@@ -1103,7 +1106,6 @@ def start_game():
         all_sprites.draw(screen)
         all_sprites.update()
         big_obstacles_group.draw(screen)
-        cat_group.update()
         player_group.update()
         screen.blit(money_fon, (0, 0))
         if money >= 120000:
@@ -1126,6 +1128,7 @@ def start_game():
                 i = 0
             break
         text = font.render(f"{str(int(money))}", True, (255, 255, 255))
+        cat_group.update()
         screen.blit(text, (66, 4))
         screen.blit(money_img, (30, 10))
         if play_sound:
