@@ -271,7 +271,7 @@ class Cat(pygame.sprite.Sprite):
         self.text6 = self.normal_font.render('Сдавай его и получай награду!', True, (255, 255, 255))
         self.mini_cat = pygame.transform.scale(load_image('dop_cat1.png', (255, 255, 255), f='images'),
                                                (45, int(45 * 1.157)))
-        self.mini_menu = pygame.transform.scale(load_image('fon_board_house.png', (0, 0, 0), f='images'), (180, 150))
+        self.mini_menu = pygame.transform.scale(load_image('fon_board_house.png', (0, 0, 0), f='images'), (205, 150))
         self.text9 = self.normal_font.render('Задание:', True, (255, 255, 255))
         self.text10 = self.normal_font.render('Прогресс:', True, (255, 255, 255))
         self.text11 = self.font.render('Задание выполнено!', True, (255, 255, 255))
@@ -982,7 +982,7 @@ def second_level():
         play_sound = False
     ostrov = Ostrov()
     ostrov.draw()
-    cat.rect.center = (490, 2430)
+    cat.rect.center = (480, 2434)
     player = Player(350, 1600)
     money_img = load_image("money_img.jpg", (255, 255, 255), f='images')
     money_img = pygame.transform.scale(money_img, (30, 30))
