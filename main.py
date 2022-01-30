@@ -17,12 +17,14 @@ diamond_group = pygame.sprite.Group()
 house_group = pygame.sprite.Group()
 ore_group = pygame.sprite.Group()
 cat_group = pygame.sprite.Group()
-titles = [[9, 10, 31, 33], [7, 11, 32], [47, 46, 45, 39, 36, 37, 35, 20, 24, 25, 27, 28, 29, 36, 34], [6, 20],
+titles = [[9, 10, 31, 33], [7, 11, 32], [47, 46, 45, 39, 36, 37, 35, 20, 24, 25, 27, 28, 29, 36, 34, 48, 43, 42],
+          [6, 20],
           [15, 16, 17, 18]]
 size_sprite = {47: (80, 80), 46: (70, 160), 45: (300, 300), 39: (70, 160), 37: (270, 250), 36: (250, 250),
                35: (200, 200), 6: (90, 90), 15: (200, 200),
                16: (200, 200), 17: (200, 200), 18: (200, 200), 20: (60, 60),
-               24: (70, 160), 25: (70, 160), 27: (60, 60), 28: (60, 60), 29: (300, 300), 34: (90, 90)}
+               24: (70, 160), 25: (70, 160), 27: (60, 60), 28: (60, 60), 29: (300, 300), 34: (90, 90), 48: (160, 200),
+               42: (60, 100), 43: (60, 60)}
 sprite_name = {6: 'box'}
 house_count = 0
 con = sqlite3.connect("data/base/data.sqlite")
@@ -100,6 +102,8 @@ class Player(pygame.sprite.Sprite):
         if level == 1:
             self.image = load_image('ZgizsloiDtI.jpg.png', (255, 255, 255), f='images')
         elif level == 2:
+            self.image = load_image('an_dino_1.png', (255, 255, 255), f='images')
+        elif level == 3:
             self.image = load_image('an_dino_1.png', (255, 255, 255), f='images')
         self.image = pygame.transform.scale(self.image, (70, int(70 * 0.8211)))
         self.rect = self.image.get_rect()
@@ -227,6 +231,8 @@ class Diamond(pygame.sprite.Sprite):
         if level == 1:
             i = 'dimond.png'
         elif level == 2:
+            i = 'dimond2.png'
+        elif level == 3:
             i = 'dimond2.png'
         self.image = pygame.transform.scale(load_image(i, (255, 255, 255)), (35, 45))
         self.rect = self.image.get_rect()
@@ -623,6 +629,8 @@ class Ostrov:
             self.map_data = pytmx.load_pygame('data/maps/map.tmx')  # [[c for c in row] for row in f.read().split('\n')]
         elif level == 2:
             self.map_data = pytmx.load_pygame('data/maps/map2.tmx')
+        elif level == 3:
+            self.map_data = pytmx.load_pygame('data/maps/map3.tmx')
         self.all_object = []
         self.ore = 6
         self.diaminds = 6
@@ -685,6 +693,8 @@ class Ostrov:
                 i = 'ore_deposits2'
             elif level == 2:
                 i = 'ore_deposits3'
+            elif level == 3:
+                i = 'ore_deposits3'
             p = PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, i)
             if not pygame.sprite.spritecollideany(p, tiles_group):
                 p.kill()
@@ -707,6 +717,8 @@ class Ostrov:
             if level == 1:
                 i = 'ore_deposits2'
             elif level == 2:
+                i = 'ore_deposits3'
+            elif level == 3:
                 i = 'ore_deposits3'
             p = PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, i)
             if not pygame.sprite.spritecollideany(p, tiles_group):
@@ -967,6 +979,95 @@ def insert_base(level, money):
     con.close()
 
 
+def tertius_level():
+    global level
+    global play_sound
+    global money
+    global camera
+    if play_sound:
+        play_sound = True
+    else:
+        play_sound = False
+    ostrov = Ostrov()
+    ostrov.draw()
+    player = Player(350, 1600)
+    money_img = load_image("money_img.jpg", (255, 255, 255), f='images')
+    money_img = pygame.transform.scale(money_img, (30, 30))
+    money_fon = pygame.transform.scale(load_image("new_money_fon.png", (0, 0, 0), f='images'), (350, 50))
+    running = True
+    clock = pygame.time.Clock()
+    board = pygame.transform.scale(load_image('fon_board_house.png', (0, 0, 0), f='images'), (205, 145))
+    fon = pygame.image.load("data/images/fon_or.png")
+    stop_but = pygame.transform.scale(load_image("no_sound.png", convert=False, f='images'), (40, 40))
+    font = pygame.font.Font('data/fonts/font.otf', 50)
+    font_medium = pygame.font.Font('data/fonts/Impact.ttf', 15)
+    text1 = font_medium.render('Ты можешь перейти ', True, (255, 255, 255))
+    text2 = font_medium.render('на следующий уровень!', True, (255, 255, 255))
+    level_but = pygame.transform.scale(load_image('level_button.png', (0, 0, 0), f='images'), (185, 75))
+    play_but = pygame.transform.scale(load_image("sound.png", convert=False, f='images'), (40, 40))
+    new_level = False
+    while running:
+        screen.fill((0, 0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                insert_base(level, money)
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = event.pos
+                if (pos[0] > 880 and pos[0] < 980) and (pos[1] > 20 and pos[1] < 80) and play_sound:
+                    play_sound = False
+                    sound.stop()
+                elif (pos[0] > 880 and pos[0] < 980) and (pos[1] > 20 and pos[1] < 80) and not play_sound:
+                    play_sound = True
+                    sound.play()
+                if money >= 120000:
+                    x, y = pos
+                    if cat.active_task:
+                        if 10 < x < 195 and 250 < y < 325:
+                            new_level = True
+                    else:
+                        if 10 < x < 195 and 110 < y < 185:
+                            new_level = True
+        camera.update(player)
+        for sprite in all_sprites:
+            camera.apply(sprite)
+        if len(diamond_group) <= ostrov.diaminds:
+            ostrov.more_dimond()
+        if len(ore_group) <= ostrov.ore:
+            ostrov.more_ore()
+        screen.blit(fon, (0, 0))
+        all_sprites.draw(screen)
+        all_sprites.update()
+        big_obstacles_group.draw(screen)
+        cat_group.draw(screen)
+        cat_group.update()
+        player_group.update()
+        screen.blit(money_fon, (0, 0))
+        if money >= 200000:
+            if cat.active_task:
+                screen.blit(board, (0, 200))
+                screen.blit(text1, (10, 210))
+                screen.blit(text2, (10, 225))
+                screen.blit(level_but, (10, 250))
+            else:
+                screen.blit(board, (0, 50))
+                screen.blit(text1, (20, 65))
+                screen.blit(text2, (20, 80))
+                screen.blit(level_but, (10, 110))
+        if new_level:
+            level = 2
+            break
+        text = font.render(f"{str(int(money))}", True, (255, 255, 255))
+        screen.blit(text, (66, 4))
+        screen.blit(money_img, (30, 10))
+        if play_sound:
+            screen.blit(play_but, (900, 20))
+        else:
+            screen.blit(stop_but, (900, 20))
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
 def second_level():
     global level
     global play_sound
@@ -1182,3 +1283,7 @@ if level == 2:
     cat = Cat(440, 2400)
     dow.draw()
     second_level()
+if level == 3:
+    cat = Cat(440, 2400)
+    dow.draw()
+    tertius_level()
