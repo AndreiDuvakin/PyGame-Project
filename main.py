@@ -723,7 +723,6 @@ class Ostrov:
             p = PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, i)
             if not pygame.sprite.spritecollideany(p, tiles_group):
                 p.kill()
-                self.ore += 1
             elif pygame.sprite.spritecollideany(p, tiles_group):
                 self.all_object.append(p)
 
@@ -738,7 +737,6 @@ class Ostrov:
             if not pygame.sprite.spritecollideany(d, tiles_group) or (
                     (x, y) in self.obstacles and (x, y) not in self.tiles):
                 d.kill()
-                self.diam += 1
             elif pygame.sprite.spritecollideany(d, tiles_group):
                 self.obstacles.append((x, y))
                 self.all_object.append(d)
@@ -990,7 +988,7 @@ def tertius_level():
         play_sound = False
     ostrov = Ostrov()
     ostrov.draw()
-    player = Player(350, 1600)
+    player = Player(-450, 2000)
     money_img = load_image("money_img.jpg", (255, 255, 255), f='images')
     money_img = pygame.transform.scale(money_img, (30, 30))
     money_fon = pygame.transform.scale(load_image("new_money_fon.png", (0, 0, 0), f='images'), (350, 50))
@@ -1284,6 +1282,6 @@ if level == 2:
     dow.draw()
     second_level()
 if level == 3:
-    cat = Cat(440, 2400)
+    cat = Cat(1449, 860)
     dow.draw()
     tertius_level()
