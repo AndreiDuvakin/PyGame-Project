@@ -1,0 +1,5 @@
+pip~=20.2.3
+setuptools~=49.2.1
+future~=0.18.2
+pygame~=2.1.2
+PyTMX~=3.31

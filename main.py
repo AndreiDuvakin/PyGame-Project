@@ -229,7 +229,7 @@ class Diamond(pygame.sprite.Sprite):
         elif level == 2:
             i = 'dimond2.png'
         self.image = pygame.transform.scale(load_image(i, (255, 255, 255)), (35, 45))
-        self.rect = self.image.get_rect().move(pos_x, pos_y)
+        self.rect = self.image.get_rect()
         self.rect.center = (pos_x, pos_y)
         # self.image = pygame.transform.scale(self.image, (50, 50))
 
@@ -271,7 +271,7 @@ class Cat(pygame.sprite.Sprite):
         self.text6 = self.normal_font.render('Сдавай его и получай награду!', True, (255, 255, 255))
         self.mini_cat = pygame.transform.scale(load_image('dop_cat1.png', (255, 255, 255), f='images'),
                                                (45, int(45 * 1.157)))
-        self.mini_menu = pygame.transform.scale(load_image('fon_board_house.png', (0, 0, 0), f='images'), (180, 150))
+        self.mini_menu = pygame.transform.scale(load_image('fon_board_house.png', (0, 0, 0), f='images'), (205, 150))
         self.text9 = self.normal_font.render('Задание:', True, (255, 255, 255))
         self.text10 = self.normal_font.render('Прогресс:', True, (255, 255, 255))
         self.text11 = self.font.render('Задание выполнено!', True, (255, 255, 255))
@@ -393,7 +393,7 @@ class PolylineObj(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y, name, num=False):
         super().__init__(all_sprites, big_obstacles_group)
         self.image = load_image(f'{name}.png', (255, 255, 255))
-        self.rect = self.image.get_rect().move(pos_x, pos_y)
+        self.rect = self.image.get_rect()
         self.rect.center = (pos_x, pos_y)
         self.num = num
         self.sound_money = pygame.mixer.Sound('data/musics/pick_up_money.mp3')
@@ -624,9 +624,12 @@ class Ostrov:
         elif level == 2:
             self.map_data = pytmx.load_pygame('data/maps/map2.tmx')
         self.all_object = []
+        self.ore = 6
+        self.diaminds = 6
 
     def draw(self):
         global house_count
+        global camera
         display.fill((0, 0, 0))
         self.height = self.map_data.height
         self.width = self.map_data.width
@@ -670,7 +673,7 @@ class Ostrov:
             if not pygame.sprite.spritecollideany(d, tiles_group):
                 d.kill()
                 diaminds += 1
-            if pygame.sprite.spritecollideany(d, tiles_group):
+            elif pygame.sprite.spritecollideany(d, tiles_group):
                 self.obstacles.append((x, y))
                 self.all_object.append(d)
         ore = random.randint(6, 20)
@@ -685,7 +688,7 @@ class Ostrov:
             p = PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, i)
             if not pygame.sprite.spritecollideany(p, tiles_group):
                 p.kill()
-            else:
+            elif pygame.sprite.spritecollideany(p, tiles_group):
                 ore_group.add(p)
                 self.all_object.append(p)
         screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0))
@@ -696,28 +699,35 @@ class Ostrov:
                 sys.exit()
 
     def more_ore(self):
-        ore = random.randint(6, 20)
-        for i in range(ore):
+        self.ore = random.randint(6, 20)
+        for i in range(self.ore):
             x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
-            while (x, y) in self.obstacles:
-                x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
-            p = PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, 'ore_deposits2')
+            x += camera.dx
+            y += camera.dy
+            if level == 1:
+                i = 'ore_deposits2'
+            elif level == 2:
+                i = 'ore_deposits3'
+            p = PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, i)
             if not pygame.sprite.spritecollideany(p, tiles_group):
                 p.kill()
-                ore += 1
-            self.all_object.append(p)
+                self.ore += 1
+            elif pygame.sprite.spritecollideany(p, tiles_group):
+                self.all_object.append(p)
 
     def more_dimond(self):
-        diaminds = random.randint(6, 50)
-        for i in range(diaminds):
+        global camera
+        self.diaminds = random.randint(6, 50)
+        for i in range(self.diaminds):
             x, y = random.randint(0, self.width), random.randint(0, self.height)
-            while (x, y) in self.obstacles and (x, y) not in self.tiles:
-                x, y = random.randint(0, self.width), random.randint(0, self.height)
+            x += camera.dx
+            y += camera.dy
             d = Diamond(550 + x * 56 - y * 56, 120 + x * 32 + y * 32)
-            if not pygame.sprite.spritecollideany(d, tiles_group):
+            if not pygame.sprite.spritecollideany(d, tiles_group) or (
+                    (x, y) in self.obstacles and (x, y) not in self.tiles):
                 d.kill()
-                diaminds += 1
-            if pygame.sprite.spritecollideany(d, tiles_group):
+                self.diam += 1
+            elif pygame.sprite.spritecollideany(d, tiles_group):
                 self.obstacles.append((x, y))
                 self.all_object.append(d)
 
@@ -961,6 +971,7 @@ def second_level():
     global level
     global play_sound
     global money
+    global camera
     if play_sound:
         play_sound = True
     else:
@@ -973,7 +984,6 @@ def second_level():
     money_fon = pygame.transform.scale(load_image("new_money_fon.png", (0, 0, 0), f='images'), (350, 50))
     running = True
     clock = pygame.time.Clock()
-    camera = Camera()
     board = pygame.transform.scale(load_image('fon_board_house.png', (0, 0, 0), f='images'), (205, 145))
     fon = pygame.image.load("data/images/fon_or.png")
     stop_but = pygame.transform.scale(load_image("no_sound.png", convert=False, f='images'), (40, 40))
@@ -1009,18 +1019,19 @@ def second_level():
         camera.update(player)
         for sprite in all_sprites:
             camera.apply(sprite)
-        if len(ore_group) <= 5:
-            ostrov.more_ore()
-        if len(diamond_group) <= 5:
+        if len(diamond_group) <= ostrov.diaminds:
             ostrov.more_dimond()
+        if len(ore_group) <= ostrov.ore:
+            ostrov.more_ore()
         screen.blit(fon, (0, 0))
         all_sprites.draw(screen)
         all_sprites.update()
         big_obstacles_group.draw(screen)
+        cat_group.draw(screen)
         cat_group.update()
         player_group.update()
         screen.blit(money_fon, (0, 0))
-        if money >= 120000:
+        if money >= 200000:
             if cat.active_task:
                 screen.blit(board, (0, 200))
                 screen.blit(text1, (10, 210))
@@ -1049,6 +1060,7 @@ def start_game():
     global level
     global play_sound
     global money
+    global camera
     ostrov = Ostrov()
     ostrov.draw()
     if play_sound:
@@ -1061,7 +1073,6 @@ def start_game():
     money_fon = pygame.transform.scale(load_image("new_money_fon.png", (0, 0, 0), f='images'), (350, 50))
     running = True
     clock = pygame.time.Clock()
-    camera = Camera()
     board = pygame.transform.scale(load_image('fon_board_house.png', (0, 0, 0), f='images'), (205, 145))
     fon = pygame.image.load("data/images/fon_or.png")
     stop_but = pygame.transform.scale(load_image("no_sound.png", convert=False, f='images'), (40, 40))
@@ -1087,7 +1098,7 @@ def start_game():
                 elif (pos[0] > 880 and pos[0] < 980) and (pos[1] > 20 and pos[1] < 80) and not play_sound:
                     play_sound = True
                     sound.play()
-                if money >= 120000:
+                if money >= 200000:
                     x, y = pos
                     if cat.active_task:
                         if 10 < x < 195 and 250 < y < 325:
@@ -1098,6 +1109,10 @@ def start_game():
         camera.update(player)
         for sprite in all_sprites:
             camera.apply(sprite)
+        if ostrov.diam > 0:
+            ostrov.fix_diamond()
+        if ostrov.ore > 0:
+            ostrov.fix_ore()
         if len(ore_group) <= 5:
             ostrov.more_ore()
         if len(diamond_group) <= 5:
@@ -1106,9 +1121,11 @@ def start_game():
         all_sprites.draw(screen)
         all_sprites.update()
         big_obstacles_group.draw(screen)
+        cat_group.draw(screen)
+        cat_group.update()
         player_group.update()
         screen.blit(money_fon, (0, 0))
-        if money >= 120000:
+        if money >= 200000:
             if cat.active_task:
                 screen.blit(board, (0, 200))
                 screen.blit(text1, (10, 210))
@@ -1126,6 +1143,7 @@ def start_game():
                 i.kill()
             for i in all:
                 i = 0
+            insert_base(level, money)
             break
         text = font.render(f"{str(int(money))}", True, (255, 255, 255))
         cat_group.update()
@@ -1152,13 +1170,15 @@ level, money = read_base()
 house_buy = len(cur.execute(f'SELECT id from house WHERE level = \'{level}\'').fetchall())
 startwin = StartWindow()
 startwin.draw()
+camera = Camera()
 instruction = Instruction()
 instruction.instruction1()
 dow = Dowload()
-cat = Cat(2530, 1380)
 if level == 1:
+    cat = Cat(2530, 1380)
     dow.draw()
     start_game()
 if level == 2:
+    cat = Cat(440, 2400)
     dow.draw()
     second_level()
