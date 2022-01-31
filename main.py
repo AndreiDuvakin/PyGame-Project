@@ -1093,6 +1093,7 @@ def second_level():
     level_but = pygame.transform.scale(load_image('level_button.png', (0, 0, 0), f='images'), (185, 75))
     play_but = pygame.transform.scale(load_image("sound.png", convert=False, f='images'), (40, 40))
     new_level = False
+    all = [board, fon, stop_but, font, font_medium, text1, text2, level_but, play_but]
     while running:
         screen.fill((0, 0, 0))
         for event in pygame.event.get():
@@ -1142,7 +1143,13 @@ def second_level():
                 screen.blit(text2, (20, 80))
                 screen.blit(level_but, (10, 110))
         if new_level:
-            level = 2
+            level = 3
+            money = 100
+            for i in all_sprites:
+                i.kill()
+            for i in all:
+                i = 0
+            insert_base(level, money)
             break
         text = font.render(f"{str(int(money))}", True, (255, 255, 255))
         screen.blit(text, (66, 4))
@@ -1182,7 +1189,7 @@ def start_game():
     level_but = pygame.transform.scale(load_image('level_button.png', (0, 0, 0), f='images'), (185, 75))
     play_but = pygame.transform.scale(load_image("sound.png", convert=False, f='images'), (40, 40))
     new_level = False
-    all = [board, fon, stop_but, font, font_medium, text1, text2, level_but, play_but, ]
+    all = [board, fon, stop_but, font, font_medium, text1, text2, level_but, play_but]
     while running:
         screen.fill((0, 0, 0))
         for event in pygame.event.get():
