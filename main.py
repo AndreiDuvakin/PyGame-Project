@@ -242,6 +242,10 @@ class Diamond(pygame.sprite.Sprite):
 
 class Cat(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
+        global house_buy
+        global house_count
+        house_count = 0
+        house_buy = house_buy = len(cur.execute(f'SELECT id from house WHERE level = \'{level}\'').fetchall())
         super().__init__(all_sprites, cat_group, big_obstacles_group)
         self.image = pygame.transform.scale(load_image('dop_cat1.png', (255, 255, 255), f='images'),
                                             (60, int(60 * 1.157)))
@@ -264,8 +268,8 @@ class Cat(pygame.sprite.Sprite):
         self.text3 = self.normal_font.render('Ну, что, абрикосина? Согласен?', True, (255, 255, 255))
         self.but = pygame.transform.scale(load_image('ex_button.png', (0, 0, 0), f='images'), (350, 140))
         self.but_complete = pygame.transform.scale(load_image('compl_button.png', (0, 0, 0), f='images'), (350, 140))
-        self.update_house = len(
-            cur.execute(f'SELECT id from house WHERE level = \'{level}\' AND income > 1').fetchall())
+        self.update_house = sum([int(i[0]) - 1 for i in cur.execute(
+            f'SELECT income from house WHERE level = \'{level}\' AND income > 1').fetchall()])
         self.count = 0
         self.type_obj = False
         self.obj = False
@@ -711,7 +715,8 @@ class Ostrov:
     def more_ore(self):
         self.ore = random.randint(6, 20)
         for i in range(self.ore):
-            x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
+            x, y = random.randint(0 - self.width // 2, self.width // 2), random.randint(0 - self.height // 2,
+                                                                                        self.height // 2)
             x += camera.dx
             y += camera.dy
             if level == 1:
@@ -730,7 +735,8 @@ class Ostrov:
         global camera
         self.diaminds = random.randint(6, 50)
         for i in range(self.diaminds):
-            x, y = random.randint(0, self.width), random.randint(0, self.height)
+            x, y = random.randint(0 - self.width // 2, self.width // 2), random.randint(0 - self.height // 2,
+                                                                                        self.height // 2)
             x += camera.dx
             y += camera.dy
             d = Diamond(550 + x * 56 - y * 56, 120 + x * 32 + y * 32)
@@ -1004,6 +1010,7 @@ def tertius_level():
     level_but = pygame.transform.scale(load_image('level_button.png', (0, 0, 0), f='images'), (185, 75))
     play_but = pygame.transform.scale(load_image("sound.png", convert=False, f='images'), (40, 40))
     new_level = False
+    all = [board, fon, stop_but, font, font_medium, text1, text2, level_but, play_but]
     while running:
         screen.fill((0, 0, 0))
         for event in pygame.event.get():
@@ -1042,7 +1049,7 @@ def tertius_level():
         player_group.update()
         house_group.update()
         screen.blit(money_fon, (0, 0))
-        if money >= 200000:
+        if money >= 750000:
             if cat.active_task:
                 screen.blit(board, (0, 200))
                 screen.blit(text1, (10, 210))
@@ -1054,13 +1061,13 @@ def tertius_level():
                 screen.blit(text2, (20, 80))
                 screen.blit(level_but, (10, 110))
         if new_level:
+            insert_base(level, money)
             level = 4
             money = 100
             for i in all_sprites:
                 i.kill()
             for i in all:
                 i = 0
-            insert_base(level, money)
             break
         text = font.render(f"{str(int(money))}", True, (255, 255, 255))
         screen.blit(text, (66, 4))
@@ -1137,8 +1144,9 @@ def second_level():
         cat_group.draw(screen)
         cat_group.update()
         player_group.update()
+        house_group.update()
         screen.blit(money_fon, (0, 0))
-        if money >= 200000:
+        if money >= 370000:
             if cat.active_task:
                 screen.blit(board, (0, 200))
                 screen.blit(text1, (10, 210))
@@ -1150,13 +1158,13 @@ def second_level():
                 screen.blit(text2, (20, 80))
                 screen.blit(level_but, (10, 110))
         if new_level:
+            insert_base(level, money)
             level = 3
             money = 100
             for i in all_sprites:
                 i.kill()
             for i in all:
                 i = 0
-            insert_base(level, money)
             break
         text = font.render(f"{str(int(money))}", True, (255, 255, 255))
         screen.blit(text, (66, 4))
@@ -1223,9 +1231,9 @@ def start_game():
         for sprite in all_sprites:
             camera.apply(sprite)
         if len(diamond_group) <= ostrov.diaminds or len(diamond_group) <= 9:
-            ostrov.more_ore()
-        if len(ore_group) <= ostrov.ore or len(ore_group) <= 9:
             ostrov.more_dimond()
+        if len(ore_group) <= ostrov.ore or len(ore_group) <= 9:
+            ostrov.more_ore()
         screen.blit(fon, (0, 0))
         all_sprites.draw(screen)
         all_sprites.update()
@@ -1246,13 +1254,13 @@ def start_game():
                 screen.blit(text2, (20, 80))
                 screen.blit(level_but, (10, 110))
         if new_level:
+            insert_base(level, money)
             level = 2
             money = 100
             for i in all_sprites:
                 i.kill()
             for i in all:
                 i = 0
-            insert_base(level, money)
             break
         text = font.render(f"{str(int(money))}", True, (255, 255, 255))
         cat_group.update()
