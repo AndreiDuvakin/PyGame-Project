@@ -233,7 +233,7 @@ class Diamond(pygame.sprite.Sprite):
         elif level == 2:
             i = 'dimond2.png'
         elif level == 3:
-            i = 'dimond2.png'
+            i = 'dimond3.png'
         self.image = pygame.transform.scale(load_image(i, (255, 255, 255)), (35, 45))
         self.rect = self.image.get_rect()
         self.rect.center = (pos_x, pos_y)
@@ -1029,9 +1029,9 @@ def tertius_level():
         camera.update(player)
         for sprite in all_sprites:
             camera.apply(sprite)
-        if len(diamond_group) <= ostrov.diaminds:
+        if len(diamond_group) <= ostrov.diaminds or len(diamond_group) <= 9:
             ostrov.more_dimond()
-        if len(ore_group) <= ostrov.ore:
+        if len(ore_group) <= ostrov.ore or len(ore_group) <= 9:
             ostrov.more_ore()
         screen.blit(fon, (0, 0))
         all_sprites.draw(screen)
@@ -1040,6 +1040,7 @@ def tertius_level():
         cat_group.draw(screen)
         cat_group.update()
         player_group.update()
+        house_group.update()
         screen.blit(money_fon, (0, 0))
         if money >= 200000:
             if cat.active_task:
@@ -1053,7 +1054,13 @@ def tertius_level():
                 screen.blit(text2, (20, 80))
                 screen.blit(level_but, (10, 110))
         if new_level:
-            level = 2
+            level = 4
+            money = 100
+            for i in all_sprites:
+                i.kill()
+            for i in all:
+                i = 0
+            insert_base(level, money)
             break
         text = font.render(f"{str(int(money))}", True, (255, 255, 255))
         screen.blit(text, (66, 4))
@@ -1119,9 +1126,9 @@ def second_level():
         camera.update(player)
         for sprite in all_sprites:
             camera.apply(sprite)
-        if len(diamond_group) <= ostrov.diaminds:
+        if len(diamond_group) <= ostrov.diaminds or len(diamond_group) <= 9:
             ostrov.more_dimond()
-        if len(ore_group) <= ostrov.ore:
+        if len(ore_group) <= ostrov.ore or len(ore_group) <= 9:
             ostrov.more_ore()
         screen.blit(fon, (0, 0))
         all_sprites.draw(screen)
@@ -1215,13 +1222,9 @@ def start_game():
         camera.update(player)
         for sprite in all_sprites:
             camera.apply(sprite)
-        if ostrov.diam > 0:
-            ostrov.fix_diamond()
-        if ostrov.ore > 0:
-            ostrov.fix_ore()
-        if len(ore_group) <= 5:
+        if len(diamond_group) <= ostrov.diaminds or len(diamond_group) <= 9:
             ostrov.more_ore()
-        if len(diamond_group) <= 5:
+        if len(ore_group) <= ostrov.ore or len(ore_group) <= 9:
             ostrov.more_dimond()
         screen.blit(fon, (0, 0))
         all_sprites.draw(screen)
