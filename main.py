@@ -51,6 +51,221 @@ def load_image(name, color_key=None, convert=True, f='titles'):
     return image
 
 
+class Board(pygame.sprite.Sprite):
+    def __init__(self, image):
+        global level
+        super().__init__(all_sprites, obstacles_group, cat_group)
+        if level == 1:
+            pos_x, pos_y = 370, 1385
+        elif level == 2:
+            pos_x, pos_y = 370, 1385
+        elif level == 3:
+            pos_x, pos_y = -430, 2100
+        self.menu = 1
+        self.image = pygame.transform.scale(image, (60, 60))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.center = (pos_x, pos_y)
+        self.mini_font = pygame.font.Font('data/fonts/Impact.ttf', 13)
+        self.font = pygame.font.Font('data/fonts/Impact.ttf', 15)
+        self.big_font = pygame.font.Font('data/fonts/Impact.ttf', 30)
+        self.normal_font = pygame.font.Font('data/fonts/Impact.ttf', 18)
+        self.button_sound = pygame.mixer.Sound('data/musics/button_sound.mp3')
+        self.window = pygame.transform.scale(load_image('fon_board_house.png', (0, 0, 0), f='images'), (400, 400))
+        self.but_1 = pygame.transform.scale(load_image('one_button.png', (0, 0, 0), f='images'), (50, 50))
+        self.but_2 = pygame.transform.scale(load_image('two_button.png', (0, 0, 0), f='images'), (50, 50))
+        self.but_3 = pygame.transform.scale(load_image('three_button.png', (0, 0, 0), f='images'), (50, 50))
+        self.text = self.normal_font.render('Приветствуем тебя в Dinosaur Settlement!', True, (255, 255, 255))
+        self.text2 = self.font.render('Мы рады, что ты решил(а) сыграть в нашу игру!', True, (255, 255, 255))
+        self.text3 = self.font.render('Ты находишься на первом уровне, и для перхода', True, (255, 255, 255))
+        self.text4 = self.font.render('нужно накопить 200 000 монеток или больше,', True, (255, 255, 255))
+        self.text5 = self.font.render('но не переживай! Их совсем не трудно заработать!', True, (255, 255, 255))
+        self.text6 = self.normal_font.render('Листай на следующие странички', True, (255, 255, 255))
+        self.text7 = self.normal_font.render('Где я объясню как это сделать', True, (255, 255, 255))
+        self.text8 = self.normal_font.render('Желаю приятной игры!', True, (255, 255, 255))
+        self.text9 = self.big_font.render('Простейший зароботок', True, (255, 255, 255))
+        self.text10 = self.font.render('Самый простой способ зароботка это собирание', True, (255, 255, 255))
+        self.text11 = self.font.render('алмазиков и собирание руды, но они отличаются.', True, (255, 255, 255))
+        self.text12 = self.font.render('За алмазики всегда дается 10 монеток, чтобы их', True, (255, 255, 255))
+        self.text13 = self.font.render('добыть нужно просто пройти через них! А вот за', True, (255, 255, 255))
+        self.text14 = self.font.render('руду можно получить больше монеток, а можно', True, (255, 255, 255))
+        self.text15 = self.font.render('и не получить вовсе! Все зависит от удачи :з', True, (255, 255, 255))
+        self.text16 = self.font.render('Алмазики и руда на разных уровнях различаются,', True, (255, 255, 255))
+        self.text17 = self.font.render('Но не пугайтесь, их свойства одинаковы :D', True, (255, 255, 255))
+        self.text18 = self.big_font.render('Домики и котик!', True, (255, 255, 255))
+        self.text19 = self.font.render('Домики! Их можно покупать и они будут приносить', True, (255, 255, 255))
+        self.text20 = self.font.render('ежесекундный доход! Их можно улучшать и', True, (255, 255, 255))
+        self.text21 = self.font.render('увеличивать доход от них!', True, (255, 255, 255))
+        self.text22 = self.font.render('Котики! Все любят котиков! У нас тоже есть свой,', True, (255, 255, 255))
+        self.text23 = self.font.render('он строгий но милый, гавкающий, но добрый и', True, (255, 255, 255))
+        self.text24 = self.font.render('вредный, но щедрый и жезнерадостный! А еще', True, (255, 255, 255))
+        self.text25 = self.font.render('он дает задания! За выполенние, которых он', True, (255, 255, 255))
+        self.text26 = self.font.render('щедро награждает монетками! Именно выполняя', True, (255, 255, 255))
+        self.text27 = self.font.render('задания ты накопишь нужную сумму!', True, (255, 255, 255))
+        self.text28 = self.normal_font.render('Приветствуем тебя на втором уровне!', True, (255, 255, 255))
+        self.text29 = self.font.render('Мы рады, что ты смог пройти первый уровень!', True, (255, 255, 255))
+        self.text30 = self.font.render('На втором уровне тебе необходимо набрать уже', True, (255, 255, 255))
+        self.text31 = self.font.render('370 000 монеток, но не переживай, накпоить их', True, (255, 255, 255))
+        self.text32 = self.font.render('также просто, как и на первом уровне!', True, (255, 255, 255))
+        self.text33 = self.normal_font.render('Приветствуем тебя на третьем уровне!', True, (255, 255, 255))
+        self.text34 = self.font.render('Мы рады, что ты смог пройти второй уровень!', True, (255, 255, 255))
+        self.text35 = self.font.render('На третьем уровне тебе необходимо набрать', True, (255, 255, 255))
+        self.text36 = self.font.render('750 000 монеток, не переживай, накпоить их', True, (255, 255, 255))
+        self.text37 = self.font.render('также просто, как и на прошлвх уровнях!', True, (255, 255, 255))
+        self.we = pygame.transform.scale(load_image('we.png', (255, 255, 255), f='images'), (60, 120))
+
+    def update(self):
+        if pygame.sprite.spritecollideany(self, player_group):
+            button_cor = list(
+                set(list(
+                    map(lambda x: x.pos if x.type == pygame.MOUSEBUTTONDOWN else False,
+                        pygame.event.get()))))
+            if button_cor != []:
+                if button_cor[0] != False:
+                    x, y = button_cor[0]
+                    if self.rect.x - 120 < x < self.rect.x - 70 and self.rect.y + 120 < y < self.rect.y + 160:
+                        self.menu = 1
+                        self.button_sound.play()
+                    elif self.rect.x - 20 < x < self.rect.x + 30 and self.rect.y + 120 < y < self.rect.y + 160:
+                        self.menu = 2
+                        self.button_sound.play()
+                    elif self.rect.x + 80 < x < self.rect.x + 130 and self.rect.y + 120 < y < self.rect.y + 160:
+                        self.menu = 3
+                        self.button_sound.play()
+            if level == 1:
+                if self.menu == 1:
+                    screen.blit(self.window, (self.rect.x - 200, self.rect.y - 200))
+                    screen.blit(self.but_1, (self.rect.x - 120, self.rect.y + 120))
+                    screen.blit(self.but_2, (self.rect.x - 20, self.rect.y + 120))
+                    screen.blit(self.but_3, (self.rect.x + 80, self.rect.y + 120))
+                    screen.blit(self.text, (self.rect.x - 175, self.rect.y - 150))
+                    screen.blit(self.text2, (self.rect.x - 175, self.rect.y - 125))
+                    screen.blit(self.text3, (self.rect.x - 180, self.rect.y - 100))
+                    screen.blit(self.text4, (self.rect.x - 180, self.rect.y - 75))
+                    screen.blit(self.text5, (self.rect.x - 180, self.rect.y - 50))
+                    screen.blit(self.text6, (self.rect.x - 180, self.rect.y - 20))
+                    screen.blit(self.text7, (self.rect.x - 180, self.rect.y + 10))
+                    screen.blit(self.text8, (self.rect.x - 180, self.rect.y + 40))
+                    screen.blit(self.we, (self.rect.x + 95, self.rect.y - 20))
+                elif self.menu == 2:
+                    screen.blit(self.window, (self.rect.x - 200, self.rect.y - 200))
+                    screen.blit(self.but_1, (self.rect.x - 120, self.rect.y + 120))
+                    screen.blit(self.but_2, (self.rect.x - 20, self.rect.y + 120))
+                    screen.blit(self.but_3, (self.rect.x + 80, self.rect.y + 120))
+                    screen.blit(self.text9, (self.rect.x - 165, self.rect.y - 165))
+                    screen.blit(self.text10, (self.rect.x - 175, self.rect.y - 125))
+                    screen.blit(self.text11, (self.rect.x - 180, self.rect.y - 100))
+                    screen.blit(self.text12, (self.rect.x - 180, self.rect.y - 75))
+                    screen.blit(self.text13, (self.rect.x - 180, self.rect.y - 50))
+                    screen.blit(self.text14, (self.rect.x - 180, self.rect.y - 25))
+                    screen.blit(self.text15, (self.rect.x - 180, self.rect.y))
+                    screen.blit(self.text16, (self.rect.x - 180, self.rect.y + 25))
+                    screen.blit(self.text17, (self.rect.x - 180, self.rect.y + 50))
+                elif self.menu == 3:
+                    screen.blit(self.window, (self.rect.x - 200, self.rect.y - 200))
+                    screen.blit(self.but_1, (self.rect.x - 120, self.rect.y + 120))
+                    screen.blit(self.but_2, (self.rect.x - 20, self.rect.y + 120))
+                    screen.blit(self.but_3, (self.rect.x + 80, self.rect.y + 120))
+                    screen.blit(self.text18, (self.rect.x - 115, self.rect.y - 165))
+                    screen.blit(self.text19, (self.rect.x - 175, self.rect.y - 125))
+                    screen.blit(self.text20, (self.rect.x - 175, self.rect.y - 100))
+                    screen.blit(self.text21, (self.rect.x - 175, self.rect.y - 75))
+                    screen.blit(self.text22, (self.rect.x - 175, self.rect.y - 50))
+                    screen.blit(self.text23, (self.rect.x - 175, self.rect.y - 25))
+                    screen.blit(self.text24, (self.rect.x - 175, self.rect.y))
+                    screen.blit(self.text25, (self.rect.x - 175, self.rect.y + 25))
+                    screen.blit(self.text26, (self.rect.x - 175, self.rect.y + 50))
+                    screen.blit(self.text27, (self.rect.x - 175, self.rect.y + 75))
+            elif level == 2:
+                if self.menu == 1:
+                    screen.blit(self.window, (self.rect.x - 200, self.rect.y - 200))
+                    screen.blit(self.but_1, (self.rect.x - 120, self.rect.y + 120))
+                    screen.blit(self.but_2, (self.rect.x - 20, self.rect.y + 120))
+                    screen.blit(self.but_3, (self.rect.x + 80, self.rect.y + 120))
+                    screen.blit(self.text28, (self.rect.x - 175, self.rect.y - 150))
+                    screen.blit(self.text29, (self.rect.x - 175, self.rect.y - 125))
+                    screen.blit(self.text30, (self.rect.x - 180, self.rect.y - 100))
+                    screen.blit(self.text31, (self.rect.x - 180, self.rect.y - 75))
+                    screen.blit(self.text32, (self.rect.x - 180, self.rect.y - 50))
+                    screen.blit(self.text6, (self.rect.x - 180, self.rect.y - 20))
+                    screen.blit(self.text7, (self.rect.x - 180, self.rect.y + 10))
+                    screen.blit(self.text8, (self.rect.x - 180, self.rect.y + 40))
+                    screen.blit(self.we, (self.rect.x + 95, self.rect.y - 20))
+                elif self.menu == 2:
+                    screen.blit(self.window, (self.rect.x - 200, self.rect.y - 200))
+                    screen.blit(self.but_1, (self.rect.x - 120, self.rect.y + 120))
+                    screen.blit(self.but_2, (self.rect.x - 20, self.rect.y + 120))
+                    screen.blit(self.but_3, (self.rect.x + 80, self.rect.y + 120))
+                    screen.blit(self.text9, (self.rect.x - 165, self.rect.y - 165))
+                    screen.blit(self.text10, (self.rect.x - 175, self.rect.y - 125))
+                    screen.blit(self.text11, (self.rect.x - 180, self.rect.y - 100))
+                    screen.blit(self.text12, (self.rect.x - 180, self.rect.y - 75))
+                    screen.blit(self.text13, (self.rect.x - 180, self.rect.y - 50))
+                    screen.blit(self.text14, (self.rect.x - 180, self.rect.y - 25))
+                    screen.blit(self.text15, (self.rect.x - 180, self.rect.y))
+                    screen.blit(self.text16, (self.rect.x - 180, self.rect.y + 25))
+                    screen.blit(self.text17, (self.rect.x - 180, self.rect.y + 50))
+                elif self.menu == 3:
+                    screen.blit(self.window, (self.rect.x - 200, self.rect.y - 200))
+                    screen.blit(self.but_1, (self.rect.x - 120, self.rect.y + 120))
+                    screen.blit(self.but_2, (self.rect.x - 20, self.rect.y + 120))
+                    screen.blit(self.but_3, (self.rect.x + 80, self.rect.y + 120))
+                    screen.blit(self.text18, (self.rect.x - 115, self.rect.y - 165))
+                    screen.blit(self.text19, (self.rect.x - 175, self.rect.y - 125))
+                    screen.blit(self.text20, (self.rect.x - 175, self.rect.y - 100))
+                    screen.blit(self.text21, (self.rect.x - 175, self.rect.y - 75))
+                    screen.blit(self.text22, (self.rect.x - 175, self.rect.y - 50))
+                    screen.blit(self.text23, (self.rect.x - 175, self.rect.y - 25))
+                    screen.blit(self.text24, (self.rect.x - 175, self.rect.y))
+                    screen.blit(self.text25, (self.rect.x - 175, self.rect.y + 25))
+                    screen.blit(self.text26, (self.rect.x - 175, self.rect.y + 50))
+                    screen.blit(self.text27, (self.rect.x - 175, self.rect.y + 75))
+            elif level == 3:
+                if self.menu == 1:
+                    screen.blit(self.window, (self.rect.x - 200, self.rect.y - 200))
+                    screen.blit(self.but_1, (self.rect.x - 120, self.rect.y + 120))
+                    screen.blit(self.but_2, (self.rect.x - 20, self.rect.y + 120))
+                    screen.blit(self.but_3, (self.rect.x + 80, self.rect.y + 120))
+                    screen.blit(self.text33, (self.rect.x - 175, self.rect.y - 150))
+                    screen.blit(self.text34, (self.rect.x - 175, self.rect.y - 125))
+                    screen.blit(self.text35, (self.rect.x - 180, self.rect.y - 100))
+                    screen.blit(self.text36, (self.rect.x - 180, self.rect.y - 75))
+                    screen.blit(self.text37, (self.rect.x - 180, self.rect.y - 50))
+                    screen.blit(self.text6, (self.rect.x - 180, self.rect.y - 20))
+                    screen.blit(self.text7, (self.rect.x - 180, self.rect.y + 10))
+                    screen.blit(self.text8, (self.rect.x - 180, self.rect.y + 40))
+                    screen.blit(self.we, (self.rect.x + 95, self.rect.y - 20))
+                elif self.menu == 2:
+                    screen.blit(self.window, (self.rect.x - 200, self.rect.y - 200))
+                    screen.blit(self.but_1, (self.rect.x - 120, self.rect.y + 120))
+                    screen.blit(self.but_2, (self.rect.x - 20, self.rect.y + 120))
+                    screen.blit(self.but_3, (self.rect.x + 80, self.rect.y + 120))
+                    screen.blit(self.text9, (self.rect.x - 165, self.rect.y - 165))
+                    screen.blit(self.text10, (self.rect.x - 175, self.rect.y - 125))
+                    screen.blit(self.text11, (self.rect.x - 180, self.rect.y - 100))
+                    screen.blit(self.text12, (self.rect.x - 180, self.rect.y - 75))
+                    screen.blit(self.text13, (self.rect.x - 180, self.rect.y - 50))
+                    screen.blit(self.text14, (self.rect.x - 180, self.rect.y - 25))
+                    screen.blit(self.text15, (self.rect.x - 180, self.rect.y))
+                    screen.blit(self.text16, (self.rect.x - 180, self.rect.y + 25))
+                    screen.blit(self.text17, (self.rect.x - 180, self.rect.y + 50))
+                elif self.menu == 3:
+                    screen.blit(self.window, (self.rect.x - 200, self.rect.y - 200))
+                    screen.blit(self.but_1, (self.rect.x - 120, self.rect.y + 120))
+                    screen.blit(self.but_2, (self.rect.x - 20, self.rect.y + 120))
+                    screen.blit(self.but_3, (self.rect.x + 80, self.rect.y + 120))
+                    screen.blit(self.text18, (self.rect.x - 115, self.rect.y - 165))
+                    screen.blit(self.text19, (self.rect.x - 175, self.rect.y - 125))
+                    screen.blit(self.text20, (self.rect.x - 175, self.rect.y - 100))
+                    screen.blit(self.text21, (self.rect.x - 175, self.rect.y - 75))
+                    screen.blit(self.text22, (self.rect.x - 175, self.rect.y - 50))
+                    screen.blit(self.text23, (self.rect.x - 175, self.rect.y - 25))
+                    screen.blit(self.text24, (self.rect.x - 175, self.rect.y))
+                    screen.blit(self.text25, (self.rect.x - 175, self.rect.y + 25))
+                    screen.blit(self.text26, (self.rect.x - 175, self.rect.y + 50))
+                    screen.blit(self.text27, (self.rect.x - 175, self.rect.y + 75))
+
+
 class StartWindow:
     def __init__(self):
         self.img = load_image("sound.png", convert=False, f='images')
@@ -677,6 +892,8 @@ class Ostrov:
                                   self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)], level)
                         self.all_object.append(t)
                         house_count += 1
+                    elif self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)] == 51:
+                        Board(self.map_data.get_tile_image(x, y, 1))
 
         diaminds = random.randint(6, 50)
         for i in range(diaminds):
