@@ -5,6 +5,7 @@ import os
 import pytmx
 import random
 import sqlite3
+import time
 
 FPS = 150
 pygame.init()
@@ -1193,11 +1194,11 @@ def read_base():
     return level, money
 
 
-def insert_base(level, money):
+def insert_base(level, money, time):
     con = sqlite3.connect("data/base/data.sqlite")
     cur = con.cursor()
-    cur.execute("""INSERT INTO main(level, money, sessiontime) VALUES(?, ?, 0)""",
-                (item_id := int(level), int(money),))
+    cur.execute("""INSERT INTO main(level, money, sessiontime) VALUES(?, ?, ?)""",
+                (item_id := int(level), int(money), abs(int(time))))
     con.commit()
     con.close()
 
@@ -1207,6 +1208,7 @@ def tertius_level():
     global play_sound
     global money
     global camera
+    global stat_time
     if play_sound:
         play_sound = True
     else:
@@ -1235,7 +1237,7 @@ def tertius_level():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-                insert_base(level, money)
+                insert_base(level, money, stat_time - time.time())
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = event.pos
                 if (pos[0] > 880 and pos[0] < 980) and (pos[1] > 20 and pos[1] < 80) and play_sound:
@@ -1280,7 +1282,7 @@ def tertius_level():
                 screen.blit(text2, (20, 80))
                 screen.blit(level_but, (10, 110))
         if new_level:
-            insert_base(level, money)
+            insert_base(level, money, stat_time - time.time())
             level = 4
             money = 100
             for i in all_sprites:
@@ -1304,6 +1306,7 @@ def second_level():
     global play_sound
     global money
     global camera
+    global stat_time
     if play_sound:
         play_sound = True
     else:
@@ -1332,7 +1335,7 @@ def second_level():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-                insert_base(level, money)
+                insert_base(level, money, stat_time - time.time())
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = event.pos
                 if (pos[0] > 880 and pos[0] < 980) and (pos[1] > 20 and pos[1] < 80) and play_sound:
@@ -1377,7 +1380,7 @@ def second_level():
                 screen.blit(text2, (20, 80))
                 screen.blit(level_but, (10, 110))
         if new_level:
-            insert_base(level, money)
+            insert_base(level, money, stat_time - time.time())
             level = 3
             money = 100
             for i in all_sprites:
@@ -1401,6 +1404,7 @@ def start_game():
     global play_sound
     global money
     global camera
+    global stat_time
     ostrov = Ostrov()
     ostrov.draw()
     if play_sound:
@@ -1429,7 +1433,7 @@ def start_game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-                insert_base(level, money)
+                insert_base(level, money, stat_time - time.time())
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = event.pos
                 if (pos[0] > 880 and pos[0] < 980) and (pos[1] > 20 and pos[1] < 80) and play_sound:
@@ -1473,7 +1477,7 @@ def start_game():
                 screen.blit(text2, (20, 80))
                 screen.blit(level_but, (10, 110))
         if new_level:
-            insert_base(level, money)
+            insert_base(level, money, stat_time - time.time())
             level = 2
             money = 100
             for i in all_sprites:
@@ -1496,6 +1500,7 @@ def start_game():
 pygame.display.set_caption('DinosaurSettlement')
 sound = pygame.mixer.Sound('data/musics/Music.mp3')
 sound.play()
+stat_time = time.time()
 play_sound = True
 icon = pygame.image.load('data/images/din.png')
 pygame.display.set_icon(icon)
