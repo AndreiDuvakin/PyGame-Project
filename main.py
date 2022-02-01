@@ -101,11 +101,13 @@ class Player(pygame.sprite.Sprite):
         super().__init__(player_group, all_sprites)
         if level == 1:
             self.image = load_image('ZgizsloiDtI.jpg.png', (255, 255, 255), f='images')
+            self.image = pygame.transform.scale(self.image, (70, int(70 * 0.8211)))
         elif level == 2:
-            self.image = load_image('an_dino_1.png', (255, 255, 255), f='images')
+            self.image = load_image('an_dino4.png', (255, 255, 255), f='images')
+            self.image = pygame.transform.scale(self.image, (70, int(70 * 0.98)))
         elif level == 3:
-            self.image = load_image('an_dino_1.png', (255, 255, 255), f='images')
-        self.image = pygame.transform.scale(self.image, (70, int(70 * 0.8211)))
+            self.image = load_image('an_dino5.png', (255, 255, 255), f='images')
+            self.image = pygame.transform.scale(self.image, (70, int(70 * 0.8511)))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.money_sound = pygame.mixer.Sound('data/musics/pick_up_money.mp3')
@@ -698,7 +700,7 @@ class Ostrov:
             elif level == 2:
                 i = 'ore_deposits3'
             elif level == 3:
-                i = 'ore_deposits3'
+                i = 'ore_deposits4'
             p = PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, i)
             if not pygame.sprite.spritecollideany(p, tiles_group):
                 p.kill()
@@ -724,7 +726,7 @@ class Ostrov:
             elif level == 2:
                 i = 'ore_deposits3'
             elif level == 3:
-                i = 'ore_deposits3'
+                i = 'ore_deposits4'
             p = PolylineObj(550 + x * 56 - y * 56, 120 + x * 32 + y * 32, i)
             if not pygame.sprite.spritecollideany(p, tiles_group):
                 p.kill()
