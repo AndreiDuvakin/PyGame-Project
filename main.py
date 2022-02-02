@@ -1181,6 +1181,60 @@ class Instruction:
         self.running()
 
 
+class Final():
+    def __init__(self):
+        self.timer = pygame.time.Clock()
+        self.im1 = load_image('dino1.png', f='images')
+        self.im1 = pygame.transform.scale(self.im1, (70, 80))
+        self.im2 = load_image('dino2.png', f='images')
+        self.im2 = pygame.transform.scale(self.im2, (70, 80))
+        self.im3 = load_image('dino3.png', f='images')
+        self.im3 = pygame.transform.scale(self.im3, (70, 80))
+        self.im4 = load_image('dino4.png', f='images')
+        self.im4 = pygame.transform.scale(self.im4, (70, 80))
+        self.fon = pygame.image.load("data/images/fon_or.png")
+        self.font = pygame.font.Font('data/fonts/font.otf', 90)
+        self.text = self.font.render("Dinosaur Settlement", True, (171, 195, 87))
+        self.count = 0
+        self.time = 0
+        self.h = 0
+        self.go_final()
+
+    def go_final(self):
+        running = True
+        while running:
+            screen.fill((255, 255, 255))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+            if self.time < 100:
+                self.draw()
+            self.timer.tick(120)
+
+
+
+    def draw_name(self):
+        global display
+        if self.time > 10:
+            self.h += 5
+        display.fill((255, 255, 255))
+        if self.count == 0:
+            display.blit(self.im1, (220, 100))
+        elif self.count == 1:
+            display.blit(self.im2, (220, 100))
+        elif self.count == 2:
+            display.blit(self.im3, (220, 100))
+        elif self.count == 3:
+            display.blit(self.im4, (220, 100))
+        screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0 - self.h))
+        screen.blit(self.text, (40, 250 - self.h))
+        pygame.display.update()
+        self.timer.tick(7)
+        self.count = (self.count + 1) % 4
+        self.time += 1
+
+
 def read_base():
     con = sqlite3.connect("data/base/data.sqlite")
     cur = con.cursor()
@@ -1527,3 +1581,5 @@ if level == 3:
     cat = Cat(1449, 860)
     dow.draw()
     tertius_level()
+if level == 4:
+    f = Final()
