@@ -20,6 +20,8 @@
 
 А это тот самый кот, о котором мы говорили ранее 
 (кстати это наш преподаватель и поэтому котика зовут Еленой)
+
+
 ![Иллюстрация персонажа](https://github.com/AndreiDuvakin/PyGame-Project/blob/DaryaTolmeneva/data/images/dop_cat.png)
 
 ## **Объекты**
