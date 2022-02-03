@@ -1194,7 +1194,9 @@ class Final():
         self.im4 = pygame.transform.scale(self.im4, (70, 80))
         self.fon = pygame.image.load("data/images/fon_or.png")
         self.font = pygame.font.Font('data/fonts/font.otf', 90)
+        self.normal_font = pygame.font.Font('data/fonts/Impact.ttf', 18)
         self.text = self.font.render("Dinosaur Settlement", True, (171, 195, 87))
+        self.text2 = self.normal_font.render('Спасибо, что играли в нашу игру!', True, (171, 195, 87))
         self.count = 0
         self.time = 0
         self.h = 0
@@ -1208,15 +1210,27 @@ class Final():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-            if self.time < 100:
-                self.draw()
+            if self.time < 20:
+                self.draw_name()
+            if 8 < self.time < 20:
+                self.draw_res()
             self.timer.tick(120)
+            self.time += 1 / 6
+
+    def draw_res(self):
+        global display
+        if self.time < 20:
+            self.h2 = 5
+        elif self.time >= 20:
+            self.h2 = 0
+        screen.blit(self.text2, (10, 250))
+        pygame.display.update()
 
 
 
     def draw_name(self):
         global display
-        if self.time > 10:
+        if self.time > 4:
             self.h += 5
         display.fill((255, 255, 255))
         if self.count == 0:
@@ -1232,7 +1246,6 @@ class Final():
         pygame.display.update()
         self.timer.tick(7)
         self.count = (self.count + 1) % 4
-        self.time += 1
 
 
 def read_base():
@@ -1582,4 +1595,4 @@ if level == 3:
     dow.draw()
     tertius_level()
 if level == 4:
-    f = Final()
+    Final()
