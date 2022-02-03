@@ -32,6 +32,15 @@ con = sqlite3.connect("data/base/data.sqlite")
 cur = con.cursor()
 
 
+def new_game():
+    cur.execute('DELETE from house')
+    cur.execute('DELETE from main')
+    cur.execute(f'INSERT INTO main(level, money, sessiontime) VALUES({1}, {0}, {0})')
+    cur.execute(f'UPDATE quests SET done = 0')
+    con.commit()
+    play()
+
+
 def load_image(name, color_key=None, convert=True, f='titles'):
     fullname = os.path.join(f'data/{f}', name)
     try:
@@ -1226,8 +1235,6 @@ class Final():
         screen.blit(self.text2, (10, 250))
         pygame.display.update()
 
-
-
     def draw_name(self):
         global display
         if self.time > 4:
@@ -1564,6 +1571,24 @@ def start_game():
         clock.tick(FPS)
 
 
+def play():
+    global cat
+    if level == 1:
+        cat = Cat(2530, 1380)
+        dow.draw()
+        start_game()
+    if level == 2:
+        cat = Cat(440, 2400)
+        dow.draw()
+        second_level()
+    if level == 3:
+        cat = Cat(1449, 860)
+        dow.draw()
+        tertius_level()
+    if level == 4:
+        Final()
+
+
 pygame.display.set_caption('DinosaurSettlement')
 sound = pygame.mixer.Sound('data/musics/Music.mp3')
 sound.play()
@@ -1582,17 +1607,4 @@ camera = Camera()
 instruction = Instruction()
 instruction.instruction1()
 dow = Dowload()
-if level == 1:
-    cat = Cat(2530, 1380)
-    dow.draw()
-    start_game()
-if level == 2:
-    cat = Cat(440, 2400)
-    dow.draw()
-    second_level()
-if level == 3:
-    cat = Cat(1449, 860)
-    dow.draw()
-    tertius_level()
-if level == 4:
-    Final()
+play()
