@@ -1181,8 +1181,11 @@ class Instruction:
         self.running()
 
 
-class Final():
+class Final:
     def __init__(self):
+        sound.stop()
+        newsound = pygame.mixer.Sound('data/musics/Titri_music.mp3')
+        newsound.play()
         self.timer = pygame.time.Clock()
         self.im1 = load_image('dino1.png', f='images')
         self.im1 = pygame.transform.scale(self.im1, (70, 80))
@@ -1192,12 +1195,21 @@ class Final():
         self.im3 = pygame.transform.scale(self.im3, (70, 80))
         self.im4 = load_image('dino4.png', f='images')
         self.im4 = pygame.transform.scale(self.im4, (70, 80))
+        self.cat = load_image('dop_cat1.png', f='images')
+        self.cat = pygame.transform.scale(self.cat, (70, 80))
         self.fon = pygame.image.load("data/images/fon_or.png")
         self.font = pygame.font.Font('data/fonts/font.otf', 90)
+        self.normal_font = pygame.font.Font('data/fonts/Impact.ttf', 18)
         self.text = self.font.render("Dinosaur Settlement", True, (171, 195, 87))
+        self.text2 = ["Спасибо, что играли в нашу игру!",
+                      "Хотим выразить отдельную благодарность Глазковой Елене Владимировне за помощь в создании ^-^",
+                      "А также сказать спасибо за ее любовь к нам и своему делу",
+                      "",
+                      "Над проектом работали Дувакин Андрей и Толменева Дарья"]
         self.count = 0
         self.time = 0
         self.h = 0
+        self.w = 10
         self.go_final()
 
     def go_final(self):
@@ -1208,15 +1220,36 @@ class Final():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-            if self.time < 100:
-                self.draw()
-            self.timer.tick(120)
+            if self.time < 20:
+                self.draw_name()
+            if self.time > 20:
+                self.draw_res()
+            self.timer.tick(60)
+            self.time += 1 / 6
+
+    def draw_res(self):
+        global display
+        if self.time >= 50:
+            self.w += 5
+        coords = 250
+        for line in self.text2:
+            string_rendered = self.normal_font.render(line, True, pygame.Color((171, 195, 87)))
+            intro_rect = string_rendered.get_rect()
+            intro_rect.top = coords
+            intro_rect.x += self.w
+            coords += intro_rect.height
+            screen.blit(string_rendered, intro_rect)
+        screen.blit(self.cat, (920 - self.w, 450))
+        pygame.display.update()
+        self.timer.tick(30)
+        # screen.blit(self.text2, (10, 250))
+        # pygame.display.update()
 
 
 
     def draw_name(self):
         global display
-        if self.time > 10:
+        if self.time > 4:
             self.h += 5
         display.fill((255, 255, 255))
         if self.count == 0:
@@ -1230,9 +1263,9 @@ class Final():
         screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0 - self.h))
         screen.blit(self.text, (40, 250 - self.h))
         pygame.display.update()
-        self.timer.tick(7)
+        self.timer.tick(5)
         self.count = (self.count + 1) % 4
-        self.time += 1
+
 
 
 def read_base():
@@ -1582,4 +1615,4 @@ if level == 3:
     dow.draw()
     tertius_level()
 if level == 4:
-    f = Final()
+    Final()
