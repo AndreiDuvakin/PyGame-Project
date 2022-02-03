@@ -32,12 +32,31 @@ con = sqlite3.connect("data/base/data.sqlite")
 cur = con.cursor()
 
 
+def format_time(time):
+    if time // 60 > 0:
+        time /= 60
+        if time // 60 > 0:
+            time /= 60
+            if time // 24 > 0:
+                return str(float(time / 24)) + 'дней'
+            else:
+                return str(float(time)) + 'часов'
+        else:
+            return str(float(time)) + ' минут'
+    else:
+        return str(float(time)) + ' секунд'
+
+
 def new_game():
+    global level
+    global money
     cur.execute('DELETE from house')
     cur.execute('DELETE from main')
     cur.execute(f'INSERT INTO main(level, money, sessiontime) VALUES({1}, {0}, {0})')
     cur.execute(f'UPDATE quests SET done = 0')
     con.commit()
+    level = 1
+    money = 0
     play()
 
 
@@ -1193,8 +1212,8 @@ class Instruction:
 class Final:
     def __init__(self):
         sound.stop()
-        newsound = pygame.mixer.Sound('data/musics/Titri_music.mp3')
-        newsound.play()
+        self.newsound = pygame.mixer.Sound('data/musics/Titri_music.mp3')
+        self.newsound.play()
         self.timer = pygame.time.Clock()
         self.im1 = load_image('dino1.png', f='images')
         self.im1 = pygame.transform.scale(self.im1, (70, 80))
@@ -1204,11 +1223,16 @@ class Final:
         self.im3 = pygame.transform.scale(self.im3, (70, 80))
         self.im4 = load_image('dino4.png', f='images')
         self.im4 = pygame.transform.scale(self.im4, (70, 80))
+        self.img_money = pygame.transform.scale(load_image("money_img.jpg", (255, 255, 255), f='images'), (150, 150))
+        self.img_dia = pygame.transform.scale(load_image("dop_diamond.png", (255, 255, 255), f='images'),
+                                              (135, 165))
+        self.but = pygame.transform.scale(load_image('n_game_button.png', (0, 0, 0), f='images'), (350, 140))
         self.cat = load_image('dop_cat1.png', f='images')
         self.cat = pygame.transform.scale(self.cat, (70, 80))
         self.fon = pygame.image.load("data/images/fon_or.png")
         self.font = pygame.font.Font('data/fonts/font.otf', 90)
         self.normal_font = pygame.font.Font('data/fonts/Impact.ttf', 18)
+        self.big_font = pygame.font.Font('data/fonts/Impact.ttf', 30)
         self.text = self.font.render("Dinosaur Settlement", True, (171, 195, 87))
         self.text2 = ["Спасибо, что играли в нашу игру!",
                       "Хотим выразить отдельную благодарность Глазковой Елене Владимировне за помощь в создании ^-^",
@@ -1218,7 +1242,47 @@ class Final:
         self.count = 0
         self.time = 0
         self.h = 0
-        self.w = 10
+        self.y_p = 0
+        self.cat_w = 0
+        self.len_sess = self.big_font.render('Вы заходили в игру ' + str(len(cur.execute(f'SELECT'
+                                                                                         f' id from'
+                                                                                         f' ma'
+                                                                                         f'in').fetchall())) + ' ра'
+                                                                                                               'з!',
+                                             True,
+                                             (171, 195, 87))
+        self.len_time = 0
+        for i in cur.execute(f'SELECT sessiontime from main').fetchall():
+            self.len_time += int(i[0])
+        self.len_time = self.big_font.render('Вы провели в игре ' + format_time(self.len_time) + '!', True,
+                                             (171, 195, 87))
+        self.money = self.big_font.render('Всего вы заработали ' + str(int(cur.execute(f'SELECT'
+                                                                                       f' money from'
+                                                                                       f' main'
+                                                                                       f' WHERE'
+                                                                                       f' level = 1').fetchall()[
+                                                                               -1][0]) + int(
+            cur.execute(f'SELECT money from main WHERE level = 2').fetchall()[-1][0]) + int(
+            cur.execute(f'SELECT money from main WHERE level = 3').fetchall()[-1][0])) + ' монеток', True,
+                                          (171, 195, 87))
+        self.house_buy = self.big_font.render('За всю игру вы купили ' + str(len(cur.execute(f'SELECT'
+                                                                                             f' id from'
+                                                                                             f' house '
+                                                                                             f'WHERE level'
+                                                                                             f' = \'{level}\''
+                                                                                             f'').fetchall()))
+                                              + ' домиков',
+                                              True, (171, 195, 87))
+        self.huose_up = self.big_font.render('И ' + str(sum([int(i[0]) - 1 for i in cur.execute(
+            f'SELECT income from house WHERE level = \'{level}\' AND income > 1').fetchall()])) + '  улучшений для них',
+                                             True, (171, 195, 87))
+        self.qeust = self.big_font.render(
+            'Вы выполнили ' + str(len(cur.execute(f'SELECT id from quests WHERE done = 1').fetchall())) + ' заданий',
+            True, (171, 195, 87))
+        self.y_p2 = 0
+        self.list_res = [self.len_sess, self.len_time, self.money, self.house_buy, self.huose_up]
+        self.text3 = self.big_font.render('Мы надеемся, что вы здорово провели время!', True, (171, 195, 87))
+        self.text4 = self.big_font.render('Вы также можете начать новую игру!', True, (171, 195, 87))
         self.go_final()
 
     def go_final(self):
@@ -1226,35 +1290,67 @@ class Final:
         while running:
             screen.fill((255, 255, 255))
             for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    x, y = event.pos
+                    if self.time > 330:
+                        if 325 < x < 675 and 255 < y < 395:
+                            screen.fill((255, 255, 255))
+                            self.newsound.stop()
+                            new_game()
+                            break
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-            if self.time < 20:
+            if self.time < 17:
                 self.draw_name()
-            if self.time > 20:
+            if 400 > self.time > 17:
                 self.draw_res()
+            if 400 > self.time > 18:
+                self.res_game()
+            if self.time > 350:
+                screen.fill((255, 255, 255))
+                self.cat_w += 10
+                screen.blit(self.but, (325, 255))
+                screen.blit(self.cat, (920 - self.cat_w, 450))
+            pygame.display.update()
             self.timer.tick(60)
             self.time += 1 / 6
 
+    def res_game(self):
+        if 85 > self.time > 16 or 169 > self.time > 110 or 400 > self.time > 200:
+            self.y_p2 += 1
+        coords = 1000
+        h = 0
+        for i in self.list_res:
+            string_rendered = i
+            intro_rect = string_rendered.get_rect()
+            intro_rect.top = coords
+            intro_rect.x = 5
+            intro_rect.y -= self.y_p2 - 40 * h
+            coords += intro_rect.height
+            screen.blit(string_rendered, (intro_rect[0] + 50, intro_rect[1]))
+            h += 1
+        screen.blit(self.img_money, (50, 800 - self.y_p2))
+        screen.blit(self.img_dia, (50, 1420 - self.y_p2))
+        screen.blit(self.text3, (50, 1585 - self.y_p2))
+        screen.blit(self.text4, (50, 1615 - self.y_p2))
+        self.timer.tick(30)
+
     def draw_res(self):
         global display
-        if self.time >= 50:
-            self.w += 5
-        coords = 250
+        if 85 > self.time > 16 or 169 > self.time > 110 or 400 > self.time > 200:
+            self.y_p += 1
+        coords = 650
         for line in self.text2:
             string_rendered = self.normal_font.render(line, True, pygame.Color((171, 195, 87)))
             intro_rect = string_rendered.get_rect()
             intro_rect.top = coords
-            intro_rect.x += self.w
+            intro_rect.x = 10
+            intro_rect.y -= self.y_p
             coords += intro_rect.height
             screen.blit(string_rendered, intro_rect)
-        screen.blit(self.cat, (920 - self.w, 450))
-        pygame.display.update()
+        screen.blit(self.cat, (920, 450))
         self.timer.tick(30)
-        # screen.blit(self.text2, (10, 250))
-        # pygame.display.update()
-
-
 
     def draw_name(self):
         global display
@@ -1272,9 +1368,8 @@ class Final:
         screen.blit(pygame.transform.scale(display, screen.get_size()), (0, 0 - self.h))
         screen.blit(self.text, (40, 250 - self.h))
         pygame.display.update()
-        self.timer.tick(5)
+        self.timer.tick(6)
         self.count = (self.count + 1) % 4
-
 
 
 def read_base():
@@ -1322,8 +1417,8 @@ def tertius_level():
     stop_but = pygame.transform.scale(load_image("no_sound.png", convert=False, f='images'), (40, 40))
     font = pygame.font.Font('data/fonts/font.otf', 50)
     font_medium = pygame.font.Font('data/fonts/Impact.ttf', 15)
-    text1 = font_medium.render('Ты можешь перейти ', True, (255, 255, 255))
-    text2 = font_medium.render('на следующий уровень!', True, (255, 255, 255))
+    text1 = font_medium.render('Ты можешь закончить ', True, (255, 255, 255))
+    text2 = font_medium.render('игру!', True, (255, 255, 255))
     level_but = pygame.transform.scale(load_image('level_button.png', (0, 0, 0), f='images'), (185, 75))
     play_but = pygame.transform.scale(load_image("sound.png", convert=False, f='images'), (40, 40))
     new_level = False
