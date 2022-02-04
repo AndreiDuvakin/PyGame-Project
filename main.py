@@ -1254,7 +1254,9 @@ class Final:
         self.len_time = 0
         for i in cur.execute(f'SELECT sessiontime from main').fetchall():
             self.len_time += int(i[0])
-        self.len_time = self.big_font.render('Вы провели в игре ' + format_time(self.len_time) + '!', True,
+        self.len_time = format_time(self.len_time)[:format_time(self.len_time).index('.') + 3] + ' ' + \
+                        format_time(self.len_time).split()[-1]
+        self.len_time = self.big_font.render('И провели в ней ' + self.len_time + '!', True,
                                              (171, 195, 87))
         self.money = self.big_font.render('Всего вы заработали ' + str(int(cur.execute(f'SELECT'
                                                                                        f' money from'
