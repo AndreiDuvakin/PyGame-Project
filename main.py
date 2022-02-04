@@ -1243,6 +1243,7 @@ class Final:
         self.time = 0
         self.h = 0
         self.y_p = 0
+        self.cat_w = 0
         self.len_sess = self.big_font.render('Вы заходили в игру ' + str(len(cur.execute(f'SELECT'
                                                                                          f' id from'
                                                                                          f' ma'
@@ -1306,8 +1307,11 @@ class Final:
                 self.draw_res()
             if 400 > self.time > 18:
                 self.res_game()
-            if self.time > 330:
+            if self.time > 350:
+                screen.fill((255, 255, 255))
+                self.cat_w += 10
                 screen.blit(self.but, (325, 255))
+                screen.blit(self.cat, (920 - self.cat_w, 450))
             pygame.display.update()
             self.timer.tick(60)
             self.time += 1 / 6
@@ -1321,14 +1325,15 @@ class Final:
             string_rendered = i
             intro_rect = string_rendered.get_rect()
             intro_rect.top = coords
+            intro_rect.x = 5
             intro_rect.y -= self.y_p2 - 40 * h
             coords += intro_rect.height
             screen.blit(string_rendered, (intro_rect[0] + 50, intro_rect[1]))
             h += 1
         screen.blit(self.img_money, (50, 800 - self.y_p2))
         screen.blit(self.img_dia, (50, 1420 - self.y_p2))
-        screen.blit(self.text3, (10, 1585 - self.y_p2))
-        screen.blit(self.text4, (10, 1615 - self.y_p2))
+        screen.blit(self.text3, (50, 1585 - self.y_p2))
+        screen.blit(self.text4, (50, 1615 - self.y_p2))
         self.timer.tick(30)
 
     def draw_res(self):
@@ -1340,6 +1345,7 @@ class Final:
             string_rendered = self.normal_font.render(line, True, pygame.Color((171, 195, 87)))
             intro_rect = string_rendered.get_rect()
             intro_rect.top = coords
+            intro_rect.x = 10
             intro_rect.y -= self.y_p
             coords += intro_rect.height
             screen.blit(string_rendered, intro_rect)
