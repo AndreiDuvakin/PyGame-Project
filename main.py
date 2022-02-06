@@ -6,6 +6,7 @@ import pytmx
 import random
 import sqlite3
 import time
+import pymorphy2
 
 FPS = 150
 pygame.init()
@@ -38,13 +39,13 @@ def format_time(time):
         if time // 60 > 0:
             time /= 60
             if time // 24 > 0:
-                return str(float(time / 24)) + 'дней'
+                return [int(time / 24), 'день']
             else:
-                return str(float(time)) + 'часов'
+                return [int(time), 'час']
         else:
-            return str(float(time)) + ' минут'
+            return [int(time), 'минуту']
     else:
-        return str(float(time)) + ' секунд'
+        return [int(time), 'секунду']
 
 
 def new_game():
@@ -1214,6 +1215,7 @@ class Final:
         sound.stop()
         self.newsound = pygame.mixer.Sound('data/musics/Titri_music.mp3')
         self.newsound.play()
+        morph = pymorphy2.MorphAnalyzer()
         self.timer = pygame.time.Clock()
         self.im1 = load_image('dino1.png', f='images')
         self.im1 = pygame.transform.scale(self.im1, (70, 80))
@@ -1244,29 +1246,32 @@ class Final:
         self.h = 0
         self.y_p = 0
         self.cat_w = 0
-        self.len_sess = self.big_font.render('Вы заходили в игру ' + str(len(cur.execute(f'SELECT'
-                                                                                         f' id from'
-                                                                                         f' ma'
-                                                                                         f'in').fetchall())) + ' ра'
-                                                                                                               'з!',
-                                             True,
-                                             (171, 195, 87))
+        inseg = len(cur.execute(f'SELECT id from main').fetchall())
+        self.len_sess = self.big_font.render(
+            'Вы заходили в игру ' + str(inseg) + ' ' + morph.parse('раз')[3].make_agree_with_number(inseg).word, True,
+            (171, 195, 87))
         self.len_time = 0
         for i in cur.execute(f'SELECT sessiontime from main').fetchall():
             self.len_time += int(i[0])
-        self.len_time = format_time(self.len_time)[:format_time(self.len_time).index('.') + 3] + ' ' + \
-                        format_time(self.len_time).split()[-1]
-        self.len_time = self.big_font.render('И провели в ней ' + self.len_time + '!', True,
+        lens = self.len_time
+        ints, word = format_time(self.len_time)
+        self.len_time = morph.parse(word)[0].make_agree_with_number(ints).word
+        self.len_time = self.big_font.render('И провели в ней ' + str(ints) + ' ' + self.len_time, True,
                                              (171, 195, 87))
-        self.money = self.big_font.render('Всего вы заработали ' + str(int(cur.execute(f'SELECT'
-                                                                                       f' money from'
-                                                                                       f' main'
-                                                                                       f' WHERE'
-                                                                                       f' level = 1').fetchall()[
-                                                                               -1][0]) + int(
-            cur.execute(f'SELECT money from main WHERE level = 2').fetchall()[-1][0]) + int(
-            cur.execute(f'SELECT money from main WHERE level = 3').fetchall()[-1][0])) + ' монеток', True,
-                                          (171, 195, 87))
+        try:
+            ints = int(cur.execute(f'SELECT'
+                                   f' money from'
+                                   f' main'
+                                   f' WHERE'
+                                   f' level = 1').fetchall()[
+                           -1][0]) + int(
+                cur.execute(f'SELECT money from main WHERE level = 2').fetchall()[-1][0]) + int(
+                cur.execute(f'SELECT money from main WHERE level = 3').fetchall()[-1][0])
+            self.money = self.big_font.render(
+                'Всего вы заработали ' + str(ints) + ' ' + morph.parse('монетка')[0].make_agree_with_number(ints).word, True,
+                (171, 195, 87))
+        except IndexError:
+            pass
         self.house_buy = self.big_font.render('За всю игру вы купили ' + str(len(cur.execute(f'SELECT'
                                                                                              f' id from'
                                                                                              f' house '
