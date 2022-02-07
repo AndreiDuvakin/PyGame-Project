@@ -503,6 +503,7 @@ class Cat(pygame.sprite.Sprite):
         self.diamond = 0
         self.ore = 0
         self.box = 0
+        self.morph = pymorphy2.MorphAnalyzer()
         self.step_foot = 0
         self.buy_house = house_buy
         self.mini_font = pygame.font.Font('data/fonts/Impact.ttf', 13)
@@ -529,11 +530,15 @@ class Cat(pygame.sprite.Sprite):
         self.mini_cat = pygame.transform.scale(load_image('dop_cat1.png', (255, 255, 255), f='images'),
                                                (45, int(45 * 1.157)))
         self.mini_menu = pygame.transform.scale(load_image('fon_board_house.png', (0, 0, 0), f='images'), (205, 150))
+        self.mini_menu2 = pygame.transform.scale(load_image('fon_board_house.png', (0, 0, 0), f='images'), (205, 200))
         self.text9 = self.normal_font.render('Задание:', True, (255, 255, 255))
         self.text10 = self.normal_font.render('Прогресс:', True, (255, 255, 255))
         self.text11 = self.font.render('Задание выполнено!', True, (255, 255, 255))
         self.text12 = self.font.render('и получи награду', True, (255, 255, 255))
         self.text13 = self.font.render('Вернись', True, (255, 255, 255))
+        self.text14 = self.normal_font.render('Время выполнения:', True, (255, 255, 255))
+        self.text15 = self.normal_font.render('Времени осталось:', True, (255, 255, 255))
+        self.time = False
 
     def update(self):
         global money
@@ -543,17 +548,26 @@ class Cat(pygame.sprite.Sprite):
                     screen.blit(self.menu, (self.rect.x + 50, self.rect.y - 100))
                     screen.blit(self.text, (self.rect.x + 85, self.rect.y - 75))
                     screen.blit(self.text1, (self.rect.x + 85, self.rect.y - 45))
-                    self.texts, self.mon, self.obj, self.count, self.id = \
+                    self.texts, self.mon, self.obj, self.count, self.id, self.time = \
                         cur.execute(f"SELECT text, awarding, typeobject,"
-                                    f" count, id from quests"
+                                    f" count, id, time from quests"
                                     f" WHERE level = {level} AND"
                                     f" done = 0").fetchall()[0]
+                    self.time = int(self.time)
                     screen.blit(self.normal_font.render(self.texts, True, (255, 255, 255)),
                                 (self.rect.x + 85, self.rect.y - 10))
                     screen.blit(self.text2, (self.rect.x + 85, self.rect.y + 15))
                     screen.blit(self.big_font.render(str(self.mon), True,
                                                      (230, 237, 25)), (self.rect.x + 200, self.rect.y + 15))
-                    screen.blit(self.text3, (self.rect.x + 90, self.rect.y + 55))
+                    if self.time:
+                        ints, word = format_time(self.time)
+                        times = str(ints) + ' ' + self.morph.parse(word)[0].make_agree_with_number(ints).word
+                        screen.blit(self.text14, (self.rect.x + 90, self.rect.y + 55))
+                        screen.blit(self.normal_font.render(times, True, (255, 255, 255)),
+                                    (self.rect.x + 270, self.rect.y + 55))
+                        screen.blit(self.text3, (self.rect.x + 90, self.rect.y + 90))
+                    else:
+                        screen.blit(self.text3, (self.rect.x + 90, self.rect.y + 55))
                     screen.blit(self.but, (self.rect.x + 80, self.rect.y + 110))
                     screen.blit(self.mini_cat, (self.rect.x + 360, self.rect.y + 230))
                     button_cor = list(
@@ -564,6 +578,8 @@ class Cat(pygame.sprite.Sprite):
                         if button_cor[0] != False:
                             x, y = button_cor[0]
                             if self.rect.x + 80 < x < self.rect.x + 430 and self.rect.y + 110 < y < self.rect.y + 250:
+                                if self.time:
+                                    self.start_time = time.time()
                                 self.active_task = True
                                 self.button_sound.play()
                                 self.type_obj = False
@@ -590,12 +606,30 @@ class Cat(pygame.sprite.Sprite):
                 self.type_obj = self.update_house
             elif self.obj == 'руда':
                 self.type_obj = self.ore
-            screen.blit(self.mini_menu, (0, 50))
+            if self.time:
+                screen.blit(self.mini_menu2, (0, 50))
+                screen.blit(self.text15, (9, 190))
+                ints, word = format_time(self.time - (time.time() - self.start_time))
+                times = str(ints) + ' ' + self.morph.parse(word)[0].make_agree_with_number(ints).word
+                screen.blit(self.normal_font.render(times, True, (255, 255, 255)), (14, 215))
+            else:
+                screen.blit(self.mini_menu, (0, 50))
             screen.blit(self.text9, (9, 58))
             screen.blit(self.mini_font.render(self.texts, True, (255, 255, 255)),
                         (9, 80))
             screen.blit(self.text2, (9, 135))
             screen.blit(self.font.render(str(self.mon), True, (230, 237, 25)), (15, 170))
+            if self.time:
+                if self.time - (time.time() - self.start_time) <= 0:
+                    self.active_task = False
+                    self.count = 0
+                    self.button_sound.play()
+                    self.type_obj = 0
+                    self.obj = False
+                    self.diamond = 0
+                    self.ore = 0
+                    self.time = False
+                    self.step_foot = 0
             if self.type_obj < self.count:
                 screen.blit(self.text10, (9, 95))
                 screen.blit(self.font.render(str(self.type_obj), True, (255, 255, 255)), (9, 115))
@@ -639,7 +673,7 @@ class Cat(pygame.sprite.Sprite):
                                 self.obj = False
                                 self.diamond = 0
                                 self.ore = 0
-                                self.box = 0
+                                self.time = False
                                 self.step_foot = 0
                                 money += self.mon
                                 cur.execute(f'UPDATE quests SET done = 1 WHERE id = {self.id}')
@@ -1268,7 +1302,8 @@ class Final:
                 cur.execute(f'SELECT money from main WHERE level = 2').fetchall()[-1][0]) + int(
                 cur.execute(f'SELECT money from main WHERE level = 3').fetchall()[-1][0])
             self.money = self.big_font.render(
-                'Всего вы заработали ' + str(ints) + ' ' + morph.parse('монетка')[0].make_agree_with_number(ints).word, True,
+                'Всего вы заработали ' + str(ints) + ' ' + morph.parse('монетка')[0].make_agree_with_number(ints).word,
+                True,
                 (171, 195, 87))
         except IndexError:
             pass
