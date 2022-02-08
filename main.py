@@ -7,6 +7,7 @@ import random
 import sqlite3
 import time
 import pymorphy2
+from random import choice
 
 FPS = 150
 pygame.init()
@@ -539,6 +540,7 @@ class Cat(pygame.sprite.Sprite):
         self.text14 = self.normal_font.render('Время выполнения:', True, (255, 255, 255))
         self.text15 = self.normal_font.render('Времени осталось:', True, (255, 255, 255))
         self.time = False
+        self.dop_que = False
 
     def update(self):
         global money
@@ -587,14 +589,50 @@ class Cat(pygame.sprite.Sprite):
                                 self.ore = 0
                                 self.step_foot = 0
                 except IndexError:
+                    if self.dop_que is False:
+                        self.texts, self.mon, self.obj, self.count, self.id, self.time = \
+                            choice(cur.execute(f"SELECT text, awarding, typeobject,"
+                                               f" count, id, time from quests"
+                                               f" WHERE level = {level} AND"
+                                               f" done = 1 and time != 0").fetchall())
+                        self.dop_que = True
                     if pygame.sprite.spritecollideany(self, player_group):
                         screen.blit(self.menu, (self.rect.x + 50, self.rect.y - 100))
                         screen.blit(self.text, (self.rect.x + 85, self.rect.y - 75))
-                        screen.blit(self.text7, (self.rect.x + 95, self.rect.y - 45))
-                        screen.blit(self.text8, (self.rect.x + 95, self.rect.y - 20))
-                        screen.blit(self.text91, (self.rect.x + 95, self.rect.y - 5))
-                        screen.blit(pygame.transform.scale(self.image, (180, 180 * 1.157)),
-                                    (self.rect.x + 150, self.rect.y + 70))
+                        screen.blit(self.text1, (self.rect.x + 85, self.rect.y - 45))
+                        self.time = int(self.time)
+                        screen.blit(self.normal_font.render(self.texts, True, (255, 255, 255)),
+                                    (self.rect.x + 85, self.rect.y - 10))
+                        screen.blit(self.text2, (self.rect.x + 85, self.rect.y + 15))
+                        screen.blit(self.big_font.render(str(self.mon), True,
+                                                         (230, 237, 25)), (self.rect.x + 200, self.rect.y + 15))
+                        if self.time:
+                            ints, word = format_time(self.time)
+                            times = str(ints) + ' ' + self.morph.parse(word)[0].make_agree_with_number(ints).word
+                            screen.blit(self.text14, (self.rect.x + 90, self.rect.y + 55))
+                            screen.blit(self.normal_font.render(times, True, (255, 255, 255)),
+                                        (self.rect.x + 270, self.rect.y + 55))
+                            screen.blit(self.text3, (self.rect.x + 90, self.rect.y + 90))
+                        else:
+                            screen.blit(self.text3, (self.rect.x + 90, self.rect.y + 55))
+                        screen.blit(self.but, (self.rect.x + 80, self.rect.y + 110))
+                        screen.blit(self.mini_cat, (self.rect.x + 360, self.rect.y + 230))
+                        button_cor = list(
+                            set(list(
+                                map(lambda x: x.pos if x.type == pygame.MOUSEBUTTONDOWN else False,
+                                    pygame.event.get()))))
+                        if button_cor != []:
+                            if button_cor[0] != False:
+                                x, y = button_cor[0]
+                                if self.rect.x + 80 < x < self.rect.x + 430 and self.rect.y + 110 < y < self.rect.y + 250:
+                                    if self.time:
+                                        self.start_time = time.time()
+                                    self.active_task = True
+                                    self.button_sound.play()
+                                    self.type_obj = False
+                                    self.diamond = 0
+                                    self.ore = 0
+                                    self.step_foot = 0
         else:
             if self.obj == 'кристалл':
                 self.type_obj = self.diamond
@@ -626,6 +664,8 @@ class Cat(pygame.sprite.Sprite):
                     self.button_sound.play()
                     self.type_obj = 0
                     self.obj = False
+                    if self.dop_que:
+                        self.dop_que = False
                     self.diamond = 0
                     self.ore = 0
                     self.time = False
@@ -671,6 +711,8 @@ class Cat(pygame.sprite.Sprite):
                                 self.button_sound.play()
                                 self.type_obj = 0
                                 self.obj = False
+                                if self.dop_que:
+                                    self.dop_que = False
                                 self.diamond = 0
                                 self.ore = 0
                                 self.time = False
