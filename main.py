@@ -7,6 +7,7 @@ import random
 import sqlite3
 import time
 import pymorphy2
+from random import choice
 
 FPS = 150
 pygame.init()
@@ -19,6 +20,7 @@ diamond_group = pygame.sprite.Group()
 house_group = pygame.sprite.Group()
 ore_group = pygame.sprite.Group()
 cat_group = pygame.sprite.Group()
+bomb_group = pygame.sprite.Group()
 titles = [[9, 10, 31, 33], [7, 11, 32], [47, 46, 45, 39, 36, 37, 35, 20, 24, 25, 27, 28, 29, 36, 34, 48, 43, 42],
           [6, 20],
           [15, 16, 17, 18]]
@@ -341,6 +343,44 @@ class StartWindow:
                         running = False
 
 
+class Bomb(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super(Bomb, self).__init__(all_sprites, bomb_group)
+        self.image = pygame.transform.scale(load_image('bomb.png', (255, 255, 255), f='images'), (35, 45))
+        self.rect = self.image.get_rect()
+        self.rect.center = (pos_x, pos_y)
+        self.button_sound = pygame.mixer.Sound('data/musics/bomb_boom.mp3')
+        self.sound_money = pygame.mixer.Sound('data/musics/pick_up_money.mp3')
+        self.boom = False
+
+    def update(self):
+        global money
+        if self.boom:
+            if self.boom > 1.1:
+                self.kill()
+            self.boom += 1 / 120
+        else:
+            if pygame.sprite.spritecollideany(self, player_group) and not pygame.key.get_pressed()[pygame.K_e]:
+                self.button_sound.play()
+                self.image = pygame.transform.scale(load_image('bomb_boom.png', (0, 0, 0), f='images'), (45, 45))
+                self.boom = 1
+                mone_minus = random.randint(100, 2000)
+                if money - mone_minus < 0:
+                    money = 0
+            elif pygame.sprite.spritecollideany(self, player_group) and pygame.key.get_pressed()[pygame.K_e]:
+                if random.choice([False, False, False, True, True]):
+                    self.kill()
+                    money += random.randint(100, 1000)
+                    self.sound_money.play()
+                else:
+                    self.button_sound.play()
+                    self.image = pygame.transform.scale(load_image('bomb_boom.png', (0, 0, 0), f='images'), (45, 45))
+                    self.boom = 1
+                    mone_minus = random.randint(100, 2000)
+                    if money - mone_minus < 0:
+                        money = 0
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
@@ -539,6 +579,7 @@ class Cat(pygame.sprite.Sprite):
         self.text14 = self.normal_font.render('Время выполнения:', True, (255, 255, 255))
         self.text15 = self.normal_font.render('Времени осталось:', True, (255, 255, 255))
         self.time = False
+        self.dop_que = False
 
     def update(self):
         global money
@@ -587,14 +628,50 @@ class Cat(pygame.sprite.Sprite):
                                 self.ore = 0
                                 self.step_foot = 0
                 except IndexError:
+                    if self.dop_que is False:
+                        self.texts, self.mon, self.obj, self.count, self.id, self.time = \
+                            choice(cur.execute(f"SELECT text, awarding, typeobject,"
+                                               f" count, id, time from quests"
+                                               f" WHERE level = {level} AND"
+                                               f" done = 1 and time != 0").fetchall())
+                        self.dop_que = True
                     if pygame.sprite.spritecollideany(self, player_group):
                         screen.blit(self.menu, (self.rect.x + 50, self.rect.y - 100))
                         screen.blit(self.text, (self.rect.x + 85, self.rect.y - 75))
-                        screen.blit(self.text7, (self.rect.x + 95, self.rect.y - 45))
-                        screen.blit(self.text8, (self.rect.x + 95, self.rect.y - 20))
-                        screen.blit(self.text91, (self.rect.x + 95, self.rect.y - 5))
-                        screen.blit(pygame.transform.scale(self.image, (180, 180 * 1.157)),
-                                    (self.rect.x + 150, self.rect.y + 70))
+                        screen.blit(self.text1, (self.rect.x + 85, self.rect.y - 45))
+                        self.time = int(self.time)
+                        screen.blit(self.normal_font.render(self.texts, True, (255, 255, 255)),
+                                    (self.rect.x + 85, self.rect.y - 10))
+                        screen.blit(self.text2, (self.rect.x + 85, self.rect.y + 15))
+                        screen.blit(self.big_font.render(str(self.mon), True,
+                                                         (230, 237, 25)), (self.rect.x + 200, self.rect.y + 15))
+                        if self.time:
+                            ints, word = format_time(self.time)
+                            times = str(ints) + ' ' + self.morph.parse(word)[0].make_agree_with_number(ints).word
+                            screen.blit(self.text14, (self.rect.x + 90, self.rect.y + 55))
+                            screen.blit(self.normal_font.render(times, True, (255, 255, 255)),
+                                        (self.rect.x + 270, self.rect.y + 55))
+                            screen.blit(self.text3, (self.rect.x + 90, self.rect.y + 90))
+                        else:
+                            screen.blit(self.text3, (self.rect.x + 90, self.rect.y + 55))
+                        screen.blit(self.but, (self.rect.x + 80, self.rect.y + 110))
+                        screen.blit(self.mini_cat, (self.rect.x + 360, self.rect.y + 230))
+                        button_cor = list(
+                            set(list(
+                                map(lambda x: x.pos if x.type == pygame.MOUSEBUTTONDOWN else False,
+                                    pygame.event.get()))))
+                        if button_cor != []:
+                            if button_cor[0] != False:
+                                x, y = button_cor[0]
+                                if self.rect.x + 80 < x < self.rect.x + 430 and self.rect.y + 110 < y < self.rect.y + 250:
+                                    if self.time:
+                                        self.start_time = time.time()
+                                    self.active_task = True
+                                    self.button_sound.play()
+                                    self.type_obj = False
+                                    self.diamond = 0
+                                    self.ore = 0
+                                    self.step_foot = 0
         else:
             if self.obj == 'кристалл':
                 self.type_obj = self.diamond
@@ -626,6 +703,8 @@ class Cat(pygame.sprite.Sprite):
                     self.button_sound.play()
                     self.type_obj = 0
                     self.obj = False
+                    if self.dop_que:
+                        self.dop_que = False
                     self.diamond = 0
                     self.ore = 0
                     self.time = False
@@ -671,6 +750,8 @@ class Cat(pygame.sprite.Sprite):
                                 self.button_sound.play()
                                 self.type_obj = 0
                                 self.obj = False
+                                if self.dop_que:
+                                    self.dop_que = False
                                 self.diamond = 0
                                 self.ore = 0
                                 self.time = False
@@ -958,7 +1039,6 @@ class Ostrov:
                         house_count += 1
                     elif self.map_data.tiledgidmap[self.map_data.get_tile_gid(x, y, 1)] == 51:
                         Board(self.map_data.get_tile_image(x, y, 1))
-
         diaminds = random.randint(6, 50)
         for i in range(diaminds):
             x, y = random.randint(0, self.width), random.randint(0, self.height)
@@ -971,6 +1051,14 @@ class Ostrov:
             elif pygame.sprite.spritecollideany(d, tiles_group):
                 self.obstacles.append((x, y))
                 self.all_object.append(d)
+        self.bombs = random.randint(1, 20)
+        for i in range(self.bombs):
+            x, y = random.randint(0, self.width), random.randint(0, self.height)
+            while (x, y) in self.obstacles and (x, y) not in self.tiles:
+                x, y = random.randint(0, self.width), random.randint(0, self.height)
+            d = Bomb(550 + x * 56 - y * 56, 120 + x * 32 + y * 32)
+            if not pygame.sprite.spritecollideany(d, tiles_group):
+                d.kill()
         ore = random.randint(6, 20)
         for i in range(ore):
             x, y = random.randint(0, self.width), random.randint(0, self.height // 2)
@@ -994,6 +1082,17 @@ class Ostrov:
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+
+    def more_bomb(self):
+        self.bombs = random.randint(1, 20)
+        for i in range(self.bombs):
+            x, y = random.randint(0 - self.width // 2, self.width // 2), random.randint(0 - self.height // 2,
+                                                                                        self.height // 2)
+            while (x, y) in self.obstacles and (x, y) not in self.tiles:
+                x, y = random.randint(0, self.width), random.randint(0, self.height)
+            d = Bomb(550 + x * 56 - y * 56, 120 + x * 32 + y * 32)
+            if not pygame.sprite.spritecollideany(d, tiles_group):
+                d.kill()
 
     def more_ore(self):
         self.ore = random.randint(6, 20)
@@ -1074,6 +1173,9 @@ class Instruction:
         self.font = pygame.font.Font('data/fonts/font.otf', 70)
         self.text = self.font.render("Instruction", True, (171, 195, 87))
         self.font2 = pygame.font.Font('data/fonts/dop_font.otf', 25)
+        self.bomb = pygame.transform.scale(load_image('bomb.png', (255, 255, 255), f='images'), (60, 70))
+        self.text2 = self.font2.render('Это бомба! Если ты к ней подойдешь, она взорвется и заберет'
+                                       ' у тебя случайное количество монет!', True, pygame.Color('black'))
         self.text_coord = 50
         self.count = 0
 
@@ -1145,12 +1247,16 @@ class Instruction:
                       "Для успешной игры рекомендуем вам изучить правила игры и основные положения"]
         opis_text = ["Главный персонаж, динозаврик, которым управлять будете вы ^-^",
                      "Еще один главный персонаж, милый котик, который будет давать задания ^-^"]
-
+        bomb_text = ['Это бомба! Если ты подойдешь к ней, то у тебя пропадет случайное количество монет.',
+                     'Но если ты подойдешь к ней с зажатой клавишей Е(англ.), то с вероятностью 36% ',
+                     'тебе может добавится случайное количество монет, но они также могут и',
+                     'пропасть, поэтому будь осторожен!']
         screen.blit(self.text, (320, 4))
         screen.blit(image_din, (15, 230))
         screen.blit(image_cat, (15, 350))
+        screen.blit(self.bomb, (30, 500))
         screen.blit(self.image_strel, (900, 550))
-        texts = [intro_text, opis_text]
+        texts = [intro_text, opis_text, bomb_text]
         self.text_coord = 50
         for i in texts:
             for line in i:
@@ -1158,6 +1264,9 @@ class Instruction:
                 intro_rect = string_rendered.get_rect()
                 if i == intro_text:
                     intro_rect.x = 10
+                    self.text_coord += 10
+                elif i == bomb_text:
+                    intro_rect.x = 150
                     self.text_coord += 10
                 else:
                     intro_rect.x = 150
@@ -1241,6 +1350,13 @@ class Instruction:
                 screen.blit(string_rendered, intro_rect)
                 pygame.display.update()
             self.text_coord += 30
+        x, y = 450, 230
+        for i in bomb_text:
+            text = self.font2.render(i, True, pygame.Color('black'))
+            x = 980 - self.font2.size(i)[0]
+            y += 25
+            screen.blit(text, (x, y))
+            pygame.display.update()
         self.running()
 
 
@@ -1492,6 +1608,8 @@ def tertius_level():
             camera.apply(sprite)
         if len(diamond_group) <= ostrov.diaminds or len(diamond_group) <= 9:
             ostrov.more_dimond()
+        if len(bomb_group) <= ostrov.bombs or len(diamond_group) <= 6:
+            ostrov.more_bomb()
         if len(ore_group) <= ostrov.ore or len(ore_group) <= 9:
             ostrov.more_ore()
         screen.blit(fon, (0, 0))
@@ -1590,6 +1708,8 @@ def second_level():
             camera.apply(sprite)
         if len(diamond_group) <= ostrov.diaminds or len(diamond_group) <= 9:
             ostrov.more_dimond()
+        if len(bomb_group) <= ostrov.bombs or len(diamond_group) <= 6:
+            ostrov.more_bomb()
         if len(ore_group) <= ostrov.ore or len(ore_group) <= 9:
             ostrov.more_ore()
         screen.blit(fon, (0, 0))
@@ -1688,6 +1808,8 @@ def start_game():
             camera.apply(sprite)
         if len(diamond_group) <= ostrov.diaminds or len(diamond_group) <= 9:
             ostrov.more_dimond()
+        if len(bomb_group) <= ostrov.bombs or len(bomb_group) <= 6:
+            ostrov.more_bomb()
         if len(ore_group) <= ostrov.ore or len(ore_group) <= 9:
             ostrov.more_ore()
         screen.blit(fon, (0, 0))
