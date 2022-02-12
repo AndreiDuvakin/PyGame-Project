@@ -367,6 +367,8 @@ class Bomb(pygame.sprite.Sprite):
                 mone_minus = random.randint(100, 2000)
                 if money - mone_minus < 0:
                     money = 0
+                else:
+                    money -= mone_minus
             elif pygame.sprite.spritecollideany(self, player_group) and pygame.key.get_pressed()[pygame.K_e]:
                 if random.choice([False, False, False, True, True]):
                     self.kill()
@@ -379,6 +381,8 @@ class Bomb(pygame.sprite.Sprite):
                     mone_minus = random.randint(100, 2000)
                     if money - mone_minus < 0:
                         money = 0
+                    else:
+                        money -= mone_minus
 
 
 class Player(pygame.sprite.Sprite):
