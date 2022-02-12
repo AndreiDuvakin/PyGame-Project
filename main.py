@@ -1247,12 +1247,16 @@ class Instruction:
                       "Для успешной игры рекомендуем вам изучить правила игры и основные положения"]
         opis_text = ["Главный персонаж, динозаврик, которым управлять будете вы ^-^",
                      "Еще один главный персонаж, милый котик, который будет давать задания ^-^"]
-
+        bomb_text = ['Это бомба! Если ты подойдешь к ней, то у тебя пропадет случайное количество монет.',
+                     'Но если ты подойдешь к ней с зажатой клавишей Е(англ.), то с вероятностью 36% ',
+                     'тебе может добавится случайное количество монет, но они также могут и',
+                     'пропасть, поэтому будь осторожен!']
         screen.blit(self.text, (320, 4))
         screen.blit(image_din, (15, 230))
         screen.blit(image_cat, (15, 350))
+        screen.blit(self.bomb, (30, 500))
         screen.blit(self.image_strel, (900, 550))
-        texts = [intro_text, opis_text]
+        texts = [intro_text, opis_text, bomb_text]
         self.text_coord = 50
         for i in texts:
             for line in i:
@@ -1260,6 +1264,9 @@ class Instruction:
                 intro_rect = string_rendered.get_rect()
                 if i == intro_text:
                     intro_rect.x = 10
+                    self.text_coord += 10
+                elif i == bomb_text:
+                    intro_rect.x = 150
                     self.text_coord += 10
                 else:
                     intro_rect.x = 150
