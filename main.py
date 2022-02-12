@@ -1173,6 +1173,9 @@ class Instruction:
         self.font = pygame.font.Font('data/fonts/font.otf', 70)
         self.text = self.font.render("Instruction", True, (171, 195, 87))
         self.font2 = pygame.font.Font('data/fonts/dop_font.otf', 25)
+        self.bomb = pygame.transform.scale(load_image('bomb.png', (255, 255, 255), f='images'), (60, 70))
+        self.text2 = self.font2.render('Это бомба! Если ты к ней подойдешь, она взорвется и заберет'
+                                       ' у тебя случайное количество монет!', True, pygame.Color('black'))
         self.text_coord = 50
         self.count = 0
 
@@ -1316,7 +1319,12 @@ class Instruction:
         screen.blit(self.text, (320, 4))
         screen.blit(self.image_strel, (900, 550))
         screen.blit(self.image_strel2, (20, 550))
+        screen.blit(self.bomb, (760, 150))
         pygame.display.update()
+        bomb_text = ['Это бомба! Если ты подойдешь к ней', 'то у тебя пропадет случайное количество',
+                     'монет. Но если ты подойдешь к ней с зажатой клавишей',
+                     'Е(англ.), то с вероятностью 36% тебе может добавится',
+                     'случайное количество монет, но они также могут и пропасть,', 'поэтому будь осторожен!']
         opis_text = ["Так же на карте вы встретите дома, которые можно купить и получать одну монетку в секунду",
                      "Купленные дома можно улучшать и тогда они будут приносить на одну монетку больше"]
         upr_text = ["Как же происходит управление?",
@@ -1340,6 +1348,13 @@ class Instruction:
                 screen.blit(string_rendered, intro_rect)
                 pygame.display.update()
             self.text_coord += 30
+        x, y = 450, 230
+        for i in bomb_text:
+            text = self.font2.render(i, True, pygame.Color('black'))
+            x = 980 - self.font2.size(i)[0]
+            y += 25
+            screen.blit(text, (x, y))
+            pygame.display.update()
         self.running()
 
 
