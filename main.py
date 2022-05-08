@@ -718,7 +718,7 @@ class Cat(pygame.sprite.Sprite):
                 screen.blit(self.font.render(str(self.type_obj), True, (255, 255, 255)), (9, 115))
                 if pygame.sprite.spritecollideany(self, player_group):
                     screen.blit(self.menu, (self.rect.x + 50, self.rect.y - 100))
-                    screen.blit(pygame.transform.scale(self.image, (180, 180 * 1.157)),
+                    screen.blit(pygame.transform.scale(self.image, (180, int(180 * 1.157))),
                                 (self.rect.x + 150, self.rect.y + 70))
                     screen.blit(self.text, (self.rect.x + 85, self.rect.y - 75))
                     screen.blit(self.text4, (self.rect.x + 90, self.rect.y - 45))
