@@ -1,3 +1,5 @@
+[🇬🇧 English](README.md)
+
 # **Dinosaur Settlement**
 
 ## Цель создания

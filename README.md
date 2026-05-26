@@ -1,3 +1,5 @@
+[🇷🇺 Русский](README_RU.md)
+
 # **Dinosaur Settlement**
 
 ## Purpose of creation
