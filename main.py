@@ -6,7 +6,7 @@ import pytmx
 import random
 import sqlite3
 import time
-import pymorphy2
+import pymorphy3
 from random import choice
 
 FPS = 150
@@ -547,7 +547,7 @@ class Cat(pygame.sprite.Sprite):
         self.diamond = 0
         self.ore = 0
         self.box = 0
-        self.morph = pymorphy2.MorphAnalyzer()
+        self.morph = pymorphy3.MorphAnalyzer()
         self.step_foot = 0
         self.buy_house = house_buy
         self.mini_font = pygame.font.Font('data/fonts/Impact.ttf', 13)
@@ -1366,7 +1366,7 @@ class Final:
         sound.stop()
         self.newsound = pygame.mixer.Sound('data/musics/Titri_music.mp3')
         self.newsound.play()
-        morph = pymorphy2.MorphAnalyzer()
+        morph = pymorphy3.MorphAnalyzer()
         self.timer = pygame.time.Clock()
         self.im1 = load_image('dino1.png', f='images')
         self.im1 = pygame.transform.scale(self.im1, (70, 80))
