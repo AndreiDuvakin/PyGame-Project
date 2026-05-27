@@ -1,5 +1,5 @@
 pygame==2.6.1
 PyTMX==3.32
-pymorphy2==2.0.6
+pymorphy3==2.0.6
 pymorphy3-dicts-ru==2.4.417150.4580142
 setuptools==81.0.0
