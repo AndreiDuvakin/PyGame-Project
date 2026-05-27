@@ -3,7 +3,7 @@
 # **Dinosaur Settlement**
 
 ## Purpose of creation
-A project completed as part of a course at the Yandex Academy Lyceum. My first experience creating a game using Pygame.
+A project completed as part of a course at the Yandex Academy Lyceum. Our first experience creating a game using Pygame.
 
 ## **About the game**
 A game about a cute dinosaur who lives on an island with a cat.
